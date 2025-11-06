@@ -120,7 +120,7 @@ df <- df |>
     starts_with("w3_q7"),
     starts_with("w3_q3"),
     starts_with("w3_q11"),
-    starts_with("w3_q27"),
+    starts_with("w3_q28"), # Mai made an adjustment from w3_q27 to w3_q28
     starts_with("w3_q29"),
     starts_with("w3_q13"),
     starts_with("w3_q43"),
@@ -128,7 +128,7 @@ df <- df |>
     starts_with("w3_q45"),
     starts_with("w4_q4"),
     starts_with("w4_q13"),
-    starts_with("w4_q30"),
+    starts_with("w4_q31"), # Mai made an adjustment from w4_q30 to w4_q31
     starts_with("w4_q32"),
     starts_with("w4_q15"),
     starts_with("w4_q47"),
