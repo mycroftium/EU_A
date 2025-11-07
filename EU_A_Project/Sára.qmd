@@ -1,0 +1,128 @@
+---
+title: "Sára"
+format: html
+editor: visual
+---
+
+---
+
+---
+
+## Importing library
+
+```{r}
+# Importing tideverse
+library(tidyverse)
+```
+
+## Importing the dataset
+
+```{r}
+# Load data set
+EU_2014_cleaned <- read_csv('EU2014/All waves GENERAL.csv')
+```
+
+## Renaming demographics
+
+```{r}
+# giving columns informative names, translating dutch names and lowercasing all letters: DEMOGRAPHICS AND DATA SET INFO
+EU_2014_cleaned <- EU_2014_cleaned |>
+rename(
+  weight_w1 = GEWICHTA1_w1,
+  weight_w2 = GEWICHTA1_w2,
+  weight_w3 = GEWICHTA1_w3,
+  weight_w4 = GEWICHTA1_w4,
+  gender = GSL,
+  age = LFT,
+  education = OPLA,
+  region = NIELSENCBS, 
+  family_size = GEZINSGROOTTE,
+  w1_date = w1_DATUM,
+  w1_time = w1_TIJD,
+  w2_date = w2_DATUM,
+  w2_time = w2_TIJD,
+  w3_date = w3_DATUM,
+  w3_time = w3_TIJD,
+  w4_date = w4_DATUM,
+  w4_time = w4_TIJD,
+) 
+
+colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed))
+```
+
+## Renaming variable names
+
+```{r}
+EU_2014_cleaned <- EU_2014_cleaned |> 
+# we need to give all variables informative name so the variables can be pivoted later.
+EU_2014_cleaned |> 
+  rename(
+    w1_nationalidentity_1 = w1_q5_1,
+    w1_nationalidentity_2 = w1_q5_2,
+    w1_nationalidentity_3 = w1_q5_3,
+    w1_nationalidentity_4 = w1_q5_4,
+    w1_attitudeglobal_1 = w1_32_1,
+    w1_attitudeglobal_2 = w1_32_2,
+    w1_attitudeglobal_3 = w1_32_3,
+    w1_attitudeglobal_4 = w1_32_4,
+    w1_voteintenteu = w1_q34,
+    w1_voteintenteu_other = w1_q34_OTHER,
+    w1_voteintentlocal = w1_q39,
+    w1_voteintentlocal_other = w1_q39_OTHER,
+    w1_antiimmigrant_1 = w1_q42_1,
+    w1_antiimmigrant_2 = w1_q42_2,
+    w1_antiimmigrant_3 = w1_q42_3,
+    w1_antiimmigrant_4 = w1_q42_4,
+    w1_antiimmigrant_5 = w1_q42_5,
+  )
+
+```
+
+## Parsing values in cells
+
+```{r}
+# Value will be parsed in only numerical forms
+EU_2014_cleaned <- EU_2014_cleaned |> 
+  mutate(
+    across(c(
+              w1_q32_1, w1_q32_1
+            ), parse_number)
+          )
+```
+
+## Make the dataset longer by introducing the "wave" column
+
+```{r}
+EU_2014_cleaned <- EU_2014_cleaned |>
+  pivot_longer(
+    cols = w1_most_important_issue:last_col(),   # Selects from this column to the very last one
+    
+    
+    names_to = c("wave", ".value"),
+    names_pattern = "w(.)_(.*)"
+  )
+EU_2014_cleaned
+```
+
+## Testing values and splitting the original file 
+
+```{r}
+
+#testing all variables for distinct values to identify variables that can be moved to the second file EXCLUDING variables that are part of waves
+select(!starts_with("w")) |> distinct()
+
+# take all stable variables based on results of previous line 
+demographics <- EU_2014_renamed |>
+  select(
+    intnr, respnr, sample, waves,
+    starts_with("weight_"),  # Include all 4 weight columns
+    gender, age, education, region, family_size, pol2012
+  )
+
+# Now we take the rest of the variables
+survey_data <- EU_2014_renamed |>
+  select(!c(sample, waves,gender, age, education, region, family_size, pol2012, starts_with("weight_") )
+  )
+```
+
+## 
