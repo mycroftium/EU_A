@@ -1,0 +1,55 @@
+---
+title: "Tidying"
+format: html
+editor: visual
+---
+
+# Tidying shared
+
+## Loading libraries
+
+```{r}
+library(tidyverse)
+```
+
+## Importing data
+
+```{r}
+raw_data <- read_csv('EU2014/All waves GENERAL.csv')
+```
+
+## Renaming columns
+
+```{r}
+
+# giving columns informative names, translating dutch names
+data_renamed <- raw_data |>
+rename(
+  intnr = INTNR,
+  respnr = RESPNR,
+  sample = SAMPLE,
+  waves = WAVES,
+  weight_w1 = GEWICHTA1_w1,
+  weight_w2 = GEWICHTA1_w2,
+  weight_w3 = GEWICHTA1_w3,
+  weight_w4 = GEWICHTA1_w4,
+  gender = GSL,
+  age = LFT,
+  education = OPLA,
+  region = NIELSENCBS, 
+  family_size = GEZINSGROOTTE,
+  pol2012 = POL2012,
+  w1_date = w1_DATUM,
+  w1_time = w1_TIJD,
+  w2_date = w2_DATUM,
+  w2_time = w2_TIJD,
+  w3_date = w3_DATUM,
+  w3_time = w3_TIJD,
+  w4_date = w4_DATUM,
+  w4_time = w4_TIJD,
+) 
+
+# lowercasing column names
+
+colnames(data_renamed) <- tolower(colnames(data_renamed))
+```
