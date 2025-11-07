@@ -1,29 +1,173 @@
 ---
-title: "Tidying"
+title: "Group project"
 format: html
 editor: visual
 ---
 
-# Tidying shared
+# Option 2 Immigration and Dutch news outlets
 
-## Loading libraries
+## Graphs
+
+**General transformations**
+
+Compute most trusted medium per person
+
+w2_q27 Media Trust \[TV\]
+
+W2_Q28 Media trust \[NP;radio;interet\]
+
+**Readership immigration attitudes**
+
+![](images/clipboard-805686383.png)
+
+W2_Q42 Anti-immigrant attitudes
+
+W1_Q42 Anti-immigrant attitudes
+
+w2_q27 Media Trust \[TV\]
+
+W2_Q28 Media trust \[NP;radio;interet\]
+
+*Variation*
+
+W1_Q54 Intergroup comfort: Muslims
+
+W1_Q56 Intergroup comfort: Poles
+
+**Wordcloud Immigrant follow-up**
+
+Most trusted medium
+
+W1_Q43 Immigrant follow up
+
+**Readership demographics**
+
+Choropleth Map
+
+![](images/clipboard-2845117677.png)
+
+W2_Q28 Media trust \[NP;radio;interet\]
+
+w2_q27 Media Trust \[TV\]
+
+NIELSENCBS (region)
+
+**Immigration stories proportion over time**
+
+![](images/clipboard-2649872974.png)
+
+**Immigration stories emotion**
+
+![](images/clipboard-1642792659.png)
+
+## Variables Needed
+
+**Dataset MCA EPE 2014 NL FINAL.csv**
+
+Rows: Outlet value 111-115\
+Columns:
+
+-   V4 (Outlet)
+
+-   V6_cleaned (Topic)
+
+-   V3b (date)
+
+-   V3c (year)
+
+-   NL1 a-e (emotion)
+
+-   NL2 (Muslims and Poles)
+
+-   NL3 (Muslims and Poles)
+
+-   NL4 (Muslims and Poles)
+
+-   NL5 (Muslims and Poles)
+
+**All waves GENERAL.csv**
+
+Rows: GENERAL
+
+Columns:
+
+-   waves (GFor which waves we have info)
+
+-   OPLA (Education)
+
+-   GSL (gender)
+
+-   LFT (age)
+
+-   NIELSENCBS (region)
+
+-   w1_q1 (Most important issue in case I can use it)
+
+-   W1_Q53 Intergroup contact: Muslims
+
+-   W1_Q54 Intergroup comfort: Muslims
+
+-   W1_Q55 Intergroup contact: Poles
+
+-   W1_Q56 Intergroup comfort: Poles
+
+-   W1_Q68 Ethnic minority
+
+-   W1_Q42 Anti-immigrant attitudes
+
+-   W1_Q43 Immigrant follow up
+
+-   w2_q27_1 **RTL Nieuws** **19.30**
+
+-   w2_q27_2 **NOS Journaal** **20.00**
+
+-   W2_Q28: Media trust \[NP;radio;interet\]
+
+    **1. De Telegraaf** w2_q28_1\
+    **2. NRC Handelsblad** w2_q28_2\
+    **6. De Volkskrant** w2_q28_6\
+    **11. nu.nl^\*^** w2_q28_11
+
+| Question                                | Waves      |
+|-----------------------------------------|------------|
+| w1_q1 Most important issue              | 1, 2, 3, 4 |
+| W1_Q54 Intergroup comfort: Muslims      | 1, 2       |
+| W1_Q56 Intergroup comfort: Poles        | 1, 2       |
+| W1_Q68 Ethnic minority                  | 1          |
+| W1_Q42 Anti-immigrant attitudes         | 1, 2       |
+| W1_Q43 Immigrant follow up              | 1, 2       |
+| w2_q27 Media Trust \[TV\]               | 2          |
+| W2_Q28 Media trust \[NP;radio;interet\] | 2          |
+
+## Method
+
+### Cleaning
+
+#### Libraries
 
 ```{r}
 library(tidyverse)
 ```
 
-## Importing data
+#### Reading in the data
 
 ```{r}
+
+#read in the panel survey data
+
 raw_data <- read_csv('EU2014/All waves GENERAL.csv')
+
+# read in the content analysis data 
+
+ca <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')                    
 ```
 
-## Renaming columns
+#### Renaming columns
 
 ```{r}
+# panel survey
 
-# giving columns informative names, translating dutch names
-data_renamed <- raw_data |>
+df <- raw_data |>
 rename(
   intnr = INTNR,
   respnr = RESPNR,
@@ -49,7 +193,355 @@ rename(
   w4_time = w4_TIJD,
 ) 
 
-# lowercasing column names
+colnames(df) <- tolower(colnames(df))
 
-colnames(data_renamed) <- tolower(colnames(data_renamed))
+# content analysis
+
+colnames(ca) <- tolower(colnames(ca))
+```
+
+#### Selecting the variables we need
+
++-------------------------------------------+-----------+------------+---------+---------+
+|                                           | Wave 1    | Wave 2     | Wave 3  | Wave 4  |
++-------------------------------------------+-----------+------------+---------+---------+
+| National identity                         | Q05       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Attitudes globalisation                   | Q32       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Vote intention EU                         | Q34       | Q35        | Q07     |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Vote intention local elections            | Q39       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Anti-immigrant attitudes                  | Q42       | Q39        |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Highest completed education               | Q61       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Income                                    | Q65       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Employment status                         | Q67       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| LFT Age                                   | age       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| GSL Gender                                | gender    |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| OPLA (Education)                          | education |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| NIELSENCBS (region)                       | region    |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **Most important issue**                  | **Q01**   | **Q01**    | **Q01** | **Q01** |
++-------------------------------------------+-----------+------------+---------+---------+
+| **W1_Q54 Intergroup comfort: Muslims**    | **Q54**   | **Q48**    |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **W1_Q56 Intergroup comfort: Poles**      | **Q56**   | **Q49**    |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **W1_Q68 Ethnic minority**                | **Q68**   |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **W1_Q42 Anti-immigrant attitudes**       | **Q42**   | **Q39**    |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **W1_Q43 Immigrant follow up**            | **Q43**   | **Q40**    |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **w2_q27_1 RTL Nieuws 19.30**             |           | **Q27_1**  |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **w2_q27_2 NOS Journaal 20.00**           |           | **Q27_2**  |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **w2_q28_1 De Telegraaf**                 |           | **Q28_1**  |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **w2_q28_2 NRC Handelsblad**              |           | **Q28_2**  |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **w2_q28_6 De Volkskrant**                |           | **Q28_6**  |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| **w2_q28_11 nu.nl**                       |           | **Q28_11** |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| Political cynicism                        | Q10       | Q07        | Q11     | Q13     |
++-------------------------------------------+-----------+------------+---------+---------+
+| EU-attitudes                              | Q26       | Q22        | Q27     | Q30     |
+|                                           |           |            |         |         |
+|                                           | Q27       | Q23        | Q29     | Q32     |
++-------------------------------------------+-----------+------------+---------+---------+
+| Economic evaluation \[EU\]                | Q12       | Q09        | Q13     | Q15     |
++-------------------------------------------+-----------+------------+---------+---------+
+| Self reported media exposure (TV)         | Q49       | Q44        | Q43     | Q47     |
++-------------------------------------------+-----------+------------+---------+---------+
+| Self reported media exposure (newspapers) | Q50       | Q45        | Q44     | Q48     |
++-------------------------------------------+-----------+------------+---------+---------+
+| Self reported media exposure (Internet)   | Q51       | Q46        | Q45     | Q49     |
++-------------------------------------------+-----------+------------+---------+---------+
+| (Co) Gender                               | GSL       |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+| (Co) Income                               |   Q65     |            |         |         |
++-------------------------------------------+-----------+------------+---------+---------+
+
+*Panel data*
+
+Only Barbora variables:
+
+```{r}
+
+df <- df |>
+  select(
+    intnr,
+    respnr,
+    sample,
+    gender,
+    age,
+    waves,
+    sample,
+    education,
+    region,
+    family_size,
+    w1_date,
+    w1_time,
+    w2_date,
+    w2_time,
+    w3_date,
+    w3_time,
+    w4_date,
+    w4_time,
+    w1_q1,
+    w2_q1,
+    w3_q1,
+    w4_q1,
+    starts_with("w1_q54"),
+    starts_with("w1_q56"),
+    starts_with("w1_q68"),
+    starts_with("w1_q42"),
+    starts_with("w1_q43"),
+    starts_with("w2_q48"),
+    starts_with("w2_q49"),
+    starts_with("w2_q39"),
+    starts_with("w2_q40"),
+    w2_q27_1,
+    w2_q27_2,
+    w2_q28_1,
+    w2_q28_2,
+    w2_q28_6,
+    w2_q28_11
+  )
+
+#view(df)
+```
+
+*Content analysis data*
+
+```{r}
+
+ca <- ca |> 
+  select(
+    v4,
+    v3a,
+    v3b,
+    v3c,
+    v6_cleaned,
+    nl1a:nl1f,
+    nl2_1_2:nl2_4_3,
+    nl3,
+    nl4_1_1:nl4_4_3,
+    nl5
+  )
+
+#view(ca)
+```
+
+#### Splitting the dataset
+
+**Case types in the data**
+
+*Participant information*
+
++-------------------------------------------------+---------------------+
+| Variable                                        | Name in the dataset |
++=================================================+=====================+
+| Gender                                          | gender              |
++-------------------------------------------------+---------------------+
+| Age                                             | age                 |
++-------------------------------------------------+---------------------+
+| for how many waves we have information          | waves               |
++-------------------------------------------------+---------------------+
+| general or youth sample                         | sample              |
++-------------------------------------------------+---------------------+
+| Education                                       | education           |
++-------------------------------------------------+---------------------+
+| Region                                          | region              |
++-------------------------------------------------+---------------------+
+| Family size                                     | family_size         |
++-------------------------------------------------+---------------------+
+| how the participant voted in the 2012 elections | pol2012             |
++-------------------------------------------------+---------------------+
+|                                                 |                     |
++-------------------------------------------------+---------------------+
+
+*Participant per wave: Attitude, knowledge, and some demographic questions*
+
+intnr
+
+respnr
+
+weights
+
+wave date and wave time (w1_date, w1_time)
+
+#### Parsing the numeric variables
+
+```{r}
+view(df)
+# putting the nonparsable variables first:
+df <- df |> 
+  relocate(w1_q68, w1_q68_yes, w1_q43,w2_q40:w2_q28_11, .after = w4_q1)
+
+# using across to apply parse_number across parsable variables
+df <- df |> 
+  mutate(
+    across(c(w1_q54_1:w2_q39_5), parse_number)
+  )
+#view(df)
+```
+
+#### Cleaning dates and times
+
+```{r}
+# using lubridate to set dates in date format
+
+df <- df |>
+  mutate(
+    across(c(w1_date, w2_date, w3_date, w4_date), ymd)
+  )
+
+# the content analysis data
+ca <- ca |> 
+  mutate(date = make_datetime(v3c, v3b, v3a),.keep = "unused", .before = v4)
+
+#view(df)
+```
+
+#### Lengthening the dataset
+
+I'm asking myself whether this is wise because there's only a few questions that have multiple waves
+
++----------------------------------------+---------+------------+---------+---------+
+| **Most important issue**               | **Q01** | **Q01**    | **Q01** | **Q01** |
++----------------------------------------+---------+------------+---------+---------+
+| **W1_Q54 Intergroup comfort: Muslims** | **Q54** | **Q54**    |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **W1_Q56 Intergroup comfort: Poles**   | **Q56** | **Q56**    |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **W1_Q68 Ethnic minority**             | **Q68** |            |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **W1_Q42 Anti-immigrant attitudes**    | **Q42** | **Q39**    |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **W1_Q43 Immigrant follow up**         | **Q43** | **Q43**    |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **w2_q27_1 RTL Nieuws 19.30**          |         | **Q27_1**  |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **w2_q27_2 NOS Journaal 20.00**        |         | **Q27_2**  |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **w2_q28_1 De Telegraaf**              |         | **Q28_1**  |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **w2_q28_2 NRC Handelsblad**           |         | **Q28_2**  |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **w2_q28_6 De Volkskrant**             |         | **Q28_6**  |         |         |
++----------------------------------------+---------+------------+---------+---------+
+| **w2_q28_11 nu.nl**                    |         | **Q28_11** |         |         |
++----------------------------------------+---------+------------+---------+---------+
+
+```{r}
+# pivoting the first question
+
+df <- df |>
+  pivot_longer(
+    cols = c(w1_q1:w4_q1),
+    names_to = "wave",
+    values_to = "q1",
+    names_prefix = "w"
+  )
+
+# changing wave class to factor
+
+df <- df |>
+  mutate(
+    wave = as_factor(wave)
+  )
+
+# changing values of the factors
+
+df <- df |>
+  mutate(
+    wave = fct_recode(
+      wave,
+      "1" = "1_q1",
+      "2" = "2_q1",
+      "3" = "3_q1",
+      "4" = "4_q1"
+  ))
+```
+
+**Trying to do the same for the other variables while putting their wave information into the wave column**
+
+```{r}
+
+# lengthening the Q56 and 49 data
+
+df <- df |>
+  pivot_longer(
+    cols = c(w1_q56_1:w1_q56_3, w2_q49_1:w2_q49_3),
+    names_to = c("wave_comfort_poles",".value"),
+#    names_pattern = "",
+#    names_prefix = "w",
+    names_sep = 3,
+#    names_repair = "unique"
+  ) 
+#colnames(df)
+# changing wave_56 class to factor
+
+df <- df |>
+  mutate(
+    wave_comfort_poles = as_factor(wave_comfort_poles)
+  )
+
+# changing values of the factors
+
+df <- df |>
+  mutate(
+    wave_comfort_poles = fct_recode(
+      wave_comfort_poles,
+      "1" = "w1_",
+      "2" = "w2_"
+  )) 
+
+# df |>
+# select(wave_comfort_poles)  add this line to view only the recoded column
+```
+
+```{r}
+# lengthening the Q54 and Q48 data
+
+df <- df |>
+  pivot_longer(
+    cols = c(w1_q54_1:w1_q54_3, w2_q48_1:w2_q48_3),
+    names_to = c("wave_comfort_muslims",".value"),
+#    names_pattern = "",
+#    names_prefix = "w",
+    names_sep = 3,
+#    names_repair = "unique"
+  ) 
+#colnames(df)
+# changing wave_56 class to factor
+
+df <- df |>
+  mutate(
+    wave_comfort_muslims = as_factor(wave_comfort_muslims)
+  )
+
+# changing values of the factors
+
+df <- df |>
+  mutate(
+    wave_comfort_poles = fct_recode(
+      wave_comfort_muslims,
+      "1" = "w1_",
+      "2" = "w2_"
+  )) 
+
+ df |>
+select(wave_comfort_muslims)  add this line to view only the recoded column
 ```
