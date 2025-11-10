@@ -72,7 +72,7 @@ colnames(EU_2014_cleaned) <- tolower(colnames(EU_2014_cleaned)) # this function 
 EU_2014_cleaned <- EU_2014_cleaned |> 
   mutate(
     across(c(                                      # we use across() throughout the code to apply functions to multiple columns
-              w1_q32_1, w1_q32_1
+              w1_q32_1, w1_q32_2, w1_q32_3, w1_q32_4
             ), parse_number)
           )
 
