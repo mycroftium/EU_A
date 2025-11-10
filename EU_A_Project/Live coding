@@ -1,6 +1,0 @@
-df <- df |>
-  pivot_longer(
-    cols = c(starts_with("w1") | starts_with("w2") | starts_with("w3") | starts_with("w4")),
-    names_to = c("wave", ".value"),
-    names_sep = "_"
-  )
