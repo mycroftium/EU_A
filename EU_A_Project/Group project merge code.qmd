@@ -20,7 +20,7 @@ library(tidyverse)
 EU_2014_cleaned <- read_csv('EU2014/All waves GENERAL.csv')
 ```
 
-## RQs overview SÁRA NEEDS TO ADD RQ
+## RQs overview 
 
 1.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU, and their political cynicism developed throughout the EU election?
 
@@ -28,10 +28,9 @@ EU_2014_cleaned <- read_csv('EU2014/All waves GENERAL.csv')
 
 3.  How does the intention to vote differ between EU and local elections, and what is the relationship between the difference and national identity, attitude towards globalisation and anti-immigrant attitudes 6 months prior to the EU elections?
 
-Barbora:
+4. How does the readership of Dutch media outlets differ in their attitudes regarding migration?
 
-1. How does the readership of Dutch media outlets differ in their attitudes regarding migration?
-2. How do Dutch media outlets cover migration?
+5. How do Dutch media outlets cover migration?
 
     \
 
