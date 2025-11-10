@@ -72,7 +72,7 @@ colnames(EU_2014_cleaned) <- tolower(colnames(EU_2014_cleaned)) # this function 
 # Value will be parsed in only numerical forms
 EU_2014_cleaned <- EU_2014_cleaned |> 
   mutate(
-    across(c(
+    across(c(                                      # we use across() throughout the code to apply functions to multiple columns
               w1_q32_1, w1_q32_1
             ), parse_number)
           )
@@ -386,10 +386,11 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     w3_most_important_issue = w3_q1,
     w4_most_important_issue = w4_q1)
 
+# using rename_with to rename multiple columns, gsub specifies which pattern should be replaced with what
 EU_2014_cleaned <- EU_2014_cleaned |>
-    rename_with(function(x) gsub("w1_q54","w1_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q54", "w1_comfort_muslims", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w2_q48","w2_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q48", "w2_comfort_muslims", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
     rename(
       w1_ethnic_minority = w1_q68) |>
@@ -455,3 +456,196 @@ QUESTIONS:
 Do we need to do joints? How would we approach it?
 
 To what extent should it be undersdtandable without the original documentation? As in do we need to include scales for variables in description
+
+
+# Content analysis 
+
+---
+title: "content_anaylsis_cleaned"
+format: html
+editor: visual
+---
+
+## Libraries
+
+```{r}
+library(tidyverse)
+```
+
+## Reading in the data
+
+```{r}
+# read in the content analysis data 
+
+ca <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')                    
+```
+
+## Cleaning
+
+```{r}
+# lowercasing column names
+
+colnames(ca) <- tolower(colnames(ca))
+```
+
+```{r}
+
+# selecting variables needed for analysis
+
+ca <- ca |> 
+  select(
+    v4,
+    v3a,
+    v3b,
+    v3c,
+    v6_cleaned,
+    nl1a:nl1f,
+    nl2_1_1:nl2_4_3,
+    nl3,
+    nl4_1_1:nl4_4_3,
+    nl5
+  )
+
+#view(ca)
+```
+
+### Cleaning dates and times
+
+```{r}
+# replacing year numbers 
+
+ca$v3c <- replace(ca$v3c, ca$v3c == 14, values = 2014)
+ca$v3c <- replace(ca$v3c, ca$v3c == 13, values = 2013)
+
+#view(ca)
+```
+
+```{r}
+# using lubridate to set dates in date format
+
+ca <- ca |> 
+  mutate(date = make_datetime(v3c, v3b, v3a),.keep = "unused", .before = v4)
+
+```
+
+### Renaming variables
+
+```{r}
+
+#renaming variables
+
+ca <- ca |>
+  rename(
+    outlet = v4,
+    topic = v6_cleaned,
+    fear = nl1a,
+    anger = nl1b,
+    disgust = nl1c,
+    hope = nl1d,
+    frustration = nl1e,
+    surprise = nl1f,
+    mention_muslim_general_netherlands = nl2_1_1,
+    mention_muslim_general_elweshere = nl2_1_2,
+    mention_muslim_general_home = nl2_1_3,
+    mention_muslim_moroccans_netherlands = nl2_2_1,
+    mention_muslim_moroccans_elsewhere = nl2_2_2,
+    mention_muslim_moroccans_home = nl2_2_3,
+    mention_muslim_turkish_netherlands = nl2_3_1,
+    mention_muslim_turkish_elsewhere = nl2_3_2,
+    mention_muslim_turkish_home = nl2_3_3,
+    mention_muslim_other_netherlands = nl2_4_1,
+    mention_muslim_other_elsewhere = nl2_4_2,
+    mention_muslim_other_home = nl2_4_3,
+    mention_east_poles_netherlands = nl4_1_1,
+    mention_east_poles_elweshere = nl4_1_2,
+    mention_east_poles_home = nl4_1_3,
+    mention_east_eu_netherlands = nl4_2_1,
+    mention_east_eu_elweshere = nl4_2_2,
+    mention_east_eu_home = nl4_2_3,
+    mention_east_general_netherlands = nl4_3_1,
+    mention_east_general_elweshere = nl4_3_2,
+    mention_east_general_home = nl4_3_3,
+    mention_east_noneu_netherlands = nl4_4_1,
+    mention_east_noneu_elweshere = nl4_4_2,
+    mention_east_noneu_home = nl4_4_3,
+    evaluation_muslims = nl3,
+    evaluation_eastern_europeans = nl5
+    ) 
+
+```
+
+### Filtering rows needed
+
+```{r}
+# filtering rows needed for the analysis (Dutch media outlets)
+
+ca <- ca |>
+  filter(
+    (outlet == "NRC Handelsblad") |
+    (outlet == "de Volkskrant") |
+    (outlet == "de Telegraaf") |
+    (outlet == "NOS Journaal") |
+    (outlet == "RTL Nieuws") |
+    (outlet == "nu.nl")
+  )
+```
+
+### 
+
+```{r}
+# replacing blank cells with NA
+ca$evaluation_muslims[ca$evaluation_muslims==" "] <- NA
+ca$evaluation_eastern_europeans[ca$evaluation_eastern_europeans==" "] <- NA
+```
+
+```{r}
+# moving evaluation columns to the front to exclude them from pivoting
+ca <- ca |>
+  relocate(starts_with("evaluation"), .before = mention_muslim_general_netherlands)
+  
+```
+
+```{r}
+# create a mention column that will indicate whether or not a group is mentioned
+# create a type column that will indicate which group is mentioned
+ca <- ca |>  
+  pivot_longer(
+    cols = mention_muslim_general_netherlands:last_col(),   # Selects the mention muslim columns
+    names_to = "type",
+    values_to = "mention"
+  )
+  
+```
+
+```{r}
+# separating the type column to multiple variables
+ca <- ca |>  
+  separate_wider_delim(
+  type,
+  delim = "_",
+  names = c("trash","group", "subgroup", "location"),
+  )
+  
+```
+
+```{r}
+# droppin the trash column
+ca <- ca |>  
+ select(!trash)
+  
+```
+
+```{r}
+# changing categorical variables into factors
+ca |>
+ mutate_at(c(outlet:mention), as.factor)
+```
+
+```{r}
+# checking levels
+ca |>
+  distinct(outlet)
+
+#renaming levels
+
+```
