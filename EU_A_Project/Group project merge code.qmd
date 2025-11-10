@@ -416,9 +416,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 ```{r}
 EU_2014_cleaned <- EU_2014_cleaned |>
   pivot_longer(
-    cols = w1_most_important_issue:last_col(),   # Selects from this column to the very last one
-    
-    
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w4_"), starts_with("w5_"))
     names_to = c("wave", ".value"),
     names_pattern = "w(.)_(.*)"
   )
