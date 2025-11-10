@@ -1,0 +1,642 @@
+---
+title: "Group project merged"
+format: html
+editor: visual
+---
+
+## Group: EU (A)
+
+## 
+
+```{r}
+# Importing tideverse
+library(tidyverse)
+```
+
+## Importing the dataset
+
+```{r}
+# Load data set
+EU_2014_cleaned <- read_csv('EU2014/All waves GENERAL.csv')
+```
+
+## RQs overview
+
+1.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU, and their political cynicism developed throughout the EU election?
+
+2.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU and their political cynicism related to their media use pattern?
+
+3.  How does the intention to vote differ between EU and local elections, and what is the relationship between the difference and national identity, attitude towards globalisation and anti-immigrant attitudes 6 months prior to the EU elections?
+
+4.  How does the readership of Dutch media outlets differ in their attitudes regarding migration?
+
+5.  How do Dutch media outlets cover migration?
+
+    \
+
+## Variables needed - ASK TOMORROW IF WE SHOULD KEEP ONLY WHAT WE ARE USING
+
+## Renaming demographics
+
+```{r}
+# giving columns informative names, translating dutch names and lowercasing all letters: DEMOGRAPHICS AND DATA SET INFO
+EU_2014_cleaned <- EU_2014_cleaned |>
+rename(
+  weight_w1 = GEWICHTA1_w1,
+  weight_w2 = GEWICHTA1_w2,
+  weight_w3 = GEWICHTA1_w3,
+  weight_w4 = GEWICHTA1_w4,
+  gender = GSL,
+  age = LFT,
+  education = OPLA,
+  region = NIELSENCBS, 
+  family_size = GEZINSGROOTTE,
+  w1_date = w1_DATUM,
+  w1_time = w1_TIJD,
+  w2_date = w2_DATUM,
+  w2_time = w2_TIJD,
+  w3_date = w3_DATUM,
+  w3_time = w3_TIJD,
+  w4_date = w4_DATUM,
+  w4_time = w4_TIJD,
+) 
+
+colnames(EU_2014_cleaned) <- tolower(colnames(EU_2014_cleaned)) # this function changes all column names to lowercase 
+                                                                # (more consistent and easy to use)
+```
+
+## Parsing values in cells - LETS ASK TOMORROW (based on that Bára's part either stays or needs to be rewritten)
+
+```{r}
+# Value will be parsed in only numerical forms
+view(EU_2014_cleaned)
+
+EU_2014_cleaned <- EU_2014_cleaned |> 
+  mutate(
+    across(c(                                      
+              w1_q32_3,
+            ), parse_number)
+          )
+
+# We start with parsing variable: Political cynicism
+EU_2014_cleaned <- EU_2014_cleaned |> 
+  mutate(
+    across(c(
+              w1_q10_1, w1_q10_2, w1_q10_3, w1_q10_4,
+              w2_q7_1, w2_q7_2, w2_q7_3, w2_q7_4,
+              w3_q11_1, w3_q11_2, w3_q11_3, w3_q11_4,
+              w4_q13_1, w4_q13_2, w4_q13_3, w4_q13_4
+            ), parse_number)
+          )
+
+# Now parse variable: EU-attitude
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(across(c(w1_q26_1:w1_q26_9, w1_q27_1:w1_q27_9,
+                  w2_q22_1:w2_q22_9, w2_q23_1:w2_q23_9,
+                  w3_q28_1:w3_q28_9, w3_q29_1:w3_q29_9,
+                  w4_q31_1:w4_q31_9, w4_q32_1:w4_q32_9),
+                parse_number)
+               )
+
+# For variable: Economic evaluation
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(across(c(w1_q12, w2_q9, w3_q13, w4_q15),
+                parse_number)
+               )
+
+# For variable: self reported media exposure (TV)
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(across(c(w1_q49_1 : w1_q49_10,
+                  w2_q44_1 : w2_q44_10,
+                  w3_q43_1 : w3_q43_10,
+                  w4_q47_1 : w4_q47_10
+                  ),
+                parse_number)
+                )
+ # For variable: self reported media exposure (newspaper)
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(across(c(w1_q50_1 : w1_q50_10,
+                  w2_q45_1 : w2_q45_10,
+                  w3_q44_1 : w3_q44_10,
+                  w4_q48_1 : w4_q48_10
+                  ),
+                parse_number)
+                )
+# Finally, for variable: self reported media exposure (Internet)
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(across(c(w1_q51_1, w1_q51_2, w1_q51_5, w1_q51_6,
+                  w2_q46_1, w2_q46_2, w2_q46_5, w2_q46_6,
+                  w3_q45_1, w3_q45_2, w3_q45_5, w3_q45_6,
+                  w4_q49_1, w4_q49_2, w4_q49_5, w4_q49_6
+                  ),
+                parse_number)
+                )
+
+# parsing barbora's variables
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(across(c(w1_q54_1, w1_q54_2, w1_q54_3, w1_q56_1, w1_q56_2, w1_q56_3, 
+                w1_q42_1:w1_q42_5, w2_q48_1:w2_q48_3, 
+                w2_q49_1:w2_q49_3, w2_q39_1:w2_q39_5),
+                parse_number)
+                )
+
+```
+
+## Adjusting time and date variables
+
+```{r}
+# using lubridate to set dates in date format
+
+EU_2014_cleaned <- EU_2014_cleaned |>
+  mutate(
+    across(c(w1_date, w2_date, w3_date, w4_date), ymd)
+  )
+
+```
+
+## Renaming variable names
+
+```{r}
+EU_2014_cleaned <- EU_2014_cleaned |> 
+# we need to give all variables informative name so the variables can be pivoted later.
+  rename(
+    w1_nationalidentity_1 = w1_q5_1,
+    w1_nationalidentity_2 = w1_q5_2,
+    w1_nationalidentity_3 = w1_q5_3,
+    w1_nationalidentity_4 = w1_q5_4,
+    w1_attitudeglobal_1 = w1_q32_1,
+    w1_attitudeglobal_2 = w1_q32_2,
+    w1_attitudeglobal_3 = w1_q32_3,
+    w1_attitudeglobal_4 = w1_q32_4,
+    w1_voteintenteu = w1_q34,
+    w1_voteintenteu_other = w1_q34_other,
+    w1_voteintentlocal = w1_q39,
+    w1_voteintentlocal_other = w1_q39_other,
+    w1_antiimmigrant_1 = w1_q42_1,
+    w1_antiimmigrant_2 = w1_q42_2,
+    w1_antiimmigrant_3 = w1_q42_3,
+    w1_antiimmigrant_4 = w1_q42_4,
+    w1_antiimmigrant_5 = w1_q42_5
+  )
+
+pol_cyn = c(w1_polcyn_1 = "w1_q10_1",
+              w1_polcyn_2 = "w1_q10_2",
+              w1_polcyn_3 = "w1_q10_3",
+              w1_polcyn_4 = "w1_q10_4",
+              w2_polcyn_1 = "w2_q7_1",
+              w2_polcyn_2 = "w2_q7_2",
+              w2_polcyn_3 = "w2_q7_3",
+              w2_polcyn_4 = "w2_q7_4",
+              w3_polcyn_1 = "w3_q11_1",
+              w3_polcyn_2 = "w3_q11_2",
+              w3_polcyn_3 = "w3_q11_3",
+              w3_polcyn_4 = "w3_q11_4",
+              w4_polcyn_1 = "w4_q13_1",
+              w4_polcyn_2 = "w4_q13_2",
+              w4_polcyn_3 = "w4_q13_3",
+              w4_polcyn_4 = "w4_q13_4"
+              )
+  eu_att1 = c(w1_eu_att1_1 = "w1_q26_1",
+              w1_eu_att1_2 = "w1_q26_2",
+              w1_eu_att1_3 = "w1_q26_3",
+              w1_eu_att1_4 = "w1_q26_4",
+              w1_eu_att1_5 = "w1_q26_5",
+              w1_eu_att1_6 = "w1_q26_6",
+              w1_eu_att1_7 = "w1_q26_7",
+              w1_eu_att1_8 = "w1_q26_8",
+              w1_eu_att1_9 = "w1_q26_9",
+              w2_eu_att1_1 = "w2_q22_1",
+              w2_eu_att1_2 = "w2_q22_2",
+              w2_eu_att1_3 = "w2_q22_3",
+              w2_eu_att1_4 = "w2_q22_4",
+              w2_eu_att1_5 = "w2_q22_5",
+              w2_eu_att1_6 = "w2_q22_6",
+              w2_eu_att1_7 = "w2_q22_7",
+              w2_eu_att1_8 = "w2_q22_8",
+              w2_eu_att1_9 = "w2_q22_9",
+              w3_eu_att1_1 = "w3_q28_1",
+              w3_eu_att1_2 = "w3_q28_2",
+              w3_eu_att1_3 = "w3_q28_3",
+              w3_eu_att1_4 = "w3_q28_4",
+              w3_eu_att1_5 = "w3_q28_5",
+              w3_eu_att1_6 = "w3_q28_6",
+              w3_eu_att1_7 = "w3_q28_7",
+              w3_eu_att1_8 = "w3_q28_8",
+              w3_eu_att1_9 = "w3_q28_9",
+              w4_eu_att1_1 = "w4_q31_1",
+              w4_eu_att1_2 = "w4_q31_2",
+              w4_eu_att1_3 = "w4_q31_3",
+              w4_eu_att1_4 = "w4_q31_4",
+              w4_eu_att1_5 = "w4_q31_5",
+              w4_eu_att1_6 = "w4_q31_6",
+              w4_eu_att1_7 = "w4_q31_7",
+              w4_eu_att1_8 = "w4_q31_8",
+              w4_eu_att1_9 = "w4_q31_9"
+              )
+  eu_att2 = c(w1_eu_att2_1 = "w1_q27_1",
+              w1_eu_att2_2 = "w1_q27_2",
+              w1_eu_att2_3 = "w1_q27_3",
+              w1_eu_att2_4 = "w1_q27_4",
+              w1_eu_att2_5 = "w1_q27_5",
+              w1_eu_att2_6 = "w1_q27_6",
+              w1_eu_att2_7 = "w1_q27_7",
+              w1_eu_att2_8 = "w1_q27_8",
+              w1_eu_att2_9 = "w1_q27_9",
+              w1_eu_att2_1 = "w1_q27_1",
+              w1_eu_att2_2 = "w1_q27_2",
+              w1_eu_att2_3 = "w1_q27_3",
+              w1_eu_att2_4 = "w1_q27_4",
+              w1_eu_att2_5 = "w1_q27_5",
+              w1_eu_att2_6 = "w1_q27_6",
+              w1_eu_att2_7 = "w1_q27_7",
+              w1_eu_att2_8 = "w1_q27_8",
+              w1_eu_att2_9 = "w1_q27_9",
+              w3_eu_att2_1 = "w3_q29_1",
+              w3_eu_att2_2 = "w3_q29_2",
+              w3_eu_att2_3 = "w3_q29_3",
+              w3_eu_att2_4 = "w3_q29_4",
+              w3_eu_att2_5 = "w3_q29_5",
+              w3_eu_att2_6 = "w3_q29_6",
+              w3_eu_att2_7 = "w3_q29_7",
+              w3_eu_att2_8 = "w3_q29_8",
+              w3_eu_att2_9 = "w3_q29_9",
+              w4_eu_att2_1 = "w4_q32_1",
+              w4_eu_att2_2 = "w4_q32_2",
+              w4_eu_att2_3 = "w4_q32_3",
+              w4_eu_att2_4 = "w4_q32_4",
+              w4_eu_att2_5 = "w4_q32_5",
+              w4_eu_att2_6 = "w4_q32_6",
+              w4_eu_att2_7 = "w4_q32_7",
+              w4_eu_att2_8 = "w4_q32_8",
+              w4_eu_att2_9 = "w4_q32_9"
+             )
+  econ_eval = c(w1_econ_eval = "w1_q12",
+                w2_econ_eval = "w2_q9",
+                w3_econ_eval = "w3_q13",
+                w4_econ_eval = "w4_q15"
+              )
+  media_tv = c( w1_media_tv_1  = "w1_q49_1",
+                w1_media_tv_2  = "w1_q49_2",
+                w1_media_tv_3  = "w1_q49_3",
+                w1_media_tv_4  = "w1_q49_4",
+                w1_media_tv_5  = "w1_q49_5",
+                w1_media_tv_6  = "w1_q49_6",
+                w1_media_tv_7  = "w1_q49_7",
+                w1_media_tv_8  = "w1_q49_8",
+                w1_media_tv_9  = "w1_q49_9",
+                w1_media_tv_10 = "w1_q49_10",
+                w2_media_tv_1  = "w2_q44_1",
+                w2_media_tv_2  = "w2_q44_2",
+                w2_media_tv_3  = "w2_q44_3",
+                w2_media_tv_4  = "w2_q44_4",
+                w2_media_tv_5  = "w2_q44_5",
+                w2_media_tv_6  = "w2_q44_6",
+                w2_media_tv_7  = "w2_q44_7",
+                w2_media_tv_8  = "w2_q44_8",
+                w2_media_tv_9  = "w2_q44_9",
+                w2_media_tv_10 = "w2_q44_10",
+                w3_media_tv_1  = "w3_q43_1",
+                w3_media_tv_2  = "w3_q43_2",
+                w3_media_tv_3  = "w3_q43_3",
+                w3_media_tv_4  = "w3_q43_4",
+                w3_media_tv_5  = "w3_q43_5",
+                w3_media_tv_6  = "w3_q43_6",
+                w3_media_tv_7  = "w3_q43_7",
+                w3_media_tv_8  = "w3_q43_8",
+                w3_media_tv_9  = "w3_q43_9",
+                w3_media_tv_10 = "w3_q43_10",
+                w4_media_tv_1  = "w4_q47_1",
+                w4_media_tv_2  = "w4_q47_2",
+                w4_media_tv_3  = "w4_q47_3",
+                w4_media_tv_4  = "w4_q47_4",
+                w4_media_tv_5  = "w4_q47_5",
+                w4_media_tv_6  = "w4_q47_6",
+                w4_media_tv_7  = "w4_q47_7",
+                w4_media_tv_8  = "w4_q47_8",
+                w4_media_tv_9  = "w4_q47_9",
+                w4_media_tv_10 = "w4_q47_10"
+              )
+  media_paper = c(w1_media_np_1  = "w1_q50_1",
+                  w1_media_np_2  = "w1_q50_2",
+                  w1_media_np_3  = "w1_q50_3",
+                  w1_media_np_4  = "w1_q50_4",
+                  w1_media_np_5  = "w1_q50_5",
+                  w1_media_np_6  = "w1_q50_6",
+                  w1_media_np_7  = "w1_q50_7",
+                  w1_media_np_8  = "w1_q50_8",
+                  w1_media_np_9  = "w1_q50_9",
+                  w1_media_np_10 = "w1_q50_10",
+                  w2_media_np_1  = "w2_q45_1",
+                  w2_media_np_2  = "w2_q45_2",
+                  w2_media_np_3  = "w2_q45_3",
+                  w2_media_np_4  = "w2_q45_4",
+                  w2_media_np_5  = "w2_q45_5",
+                  w2_media_np_6  = "w2_q45_6",
+                  w2_media_np_7  = "w2_q45_7",
+                  w2_media_np_8  = "w2_q45_8",
+                  w2_media_np_9  = "w2_q45_9",
+                  w2_media_np_10 = "w2_q45_10",
+                  w3_media_np_1  = "w3_q44_1",
+                  w3_media_np_2  = "w3_q44_2",
+                  w3_media_np_3  = "w3_q44_3",
+                  w3_media_np_4  = "w3_q44_4",
+                  w3_media_np_5  = "w3_q44_5",
+                  w3_media_np_6  = "w3_q44_6",
+                  w3_media_np_7  = "w3_q44_7",
+                  w3_media_np_8  = "w3_q44_8",
+                  w3_media_np_9  = "w3_q44_9",
+                  w3_media_np_10 = "w3_q44_10",
+                  w4_media_np_1  = "w4_q48_1",
+                  w4_media_np_2  = "w4_q48_2",
+                  w4_media_np_3  = "w4_q48_3",
+                  w4_media_np_4  = "w4_q48_4",
+                  w4_media_np_5  = "w4_q48_5",
+                  w4_media_np_6  = "w4_q48_6",
+                  w4_media_np_7  = "w4_q48_7",
+                  w4_media_np_8  = "w4_q48_8",
+                  w4_media_np_9  = "w4_q48_9",
+                  w4_media_np_10 = "w4_q48_10"
+                 )
+  media_int = c(w1_media_int_1 = "w1_q51_1",
+                w1_media_int_2 = "w1_q51_2",
+                w1_media_int_3 = "w1_q51_5",
+                w1_media_int_4 = "w1_q51_6",
+                w2_media_int_1 = "w2_q46_1",
+                w2_media_int_2 = "w2_q46_2",
+                w2_media_int_3 = "w2_q46_5",
+                w2_media_int_4 = "w2_q46_6",
+                w3_media_int_1 = "w3_q45_1",
+                w3_media_int_2 = "w3_q45_2",
+                w3_media_int_3 = "w3_q45_5",
+                w3_media_int_4 = "w3_q45_6",
+                w4_media_int_1 = "w4_q49_1",
+                w4_media_int_2 = "w4_q49_2",
+                w4_media_int_3 = "w4_q49_5",
+                w4_media_int_4 = "w4_q49_6"
+                )
+lookup <- c(pol_cyn, eu_att1, eu_att2, econ_eval, media_tv, media_paper, media_int)
+
+rename(EU_2014_cleaned, all_of(lookup))
+EU_2014_cleaned
+
+EU_2014_cleaned <- EU_2014_cleaned |>
+  rename(
+    w1_most_important_issue = w1_q1,
+    w2_most_important_issue = w2_q1,
+    w3_most_important_issue = w3_q1,
+    w4_most_important_issue = w4_q1)
+
+# using rename_with to rename multiple columns, gsub specifies which pattern should be replaced with what
+EU_2014_cleaned <- EU_2014_cleaned |>
+    rename_with(function(x) gsub("w1_q54", "w1_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q48", "w2_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
+    rename(
+      w1_ethnic_minority = w1_q68) |>
+    rename(
+      w1_ethnic_minority_specification = w1_q68_yes) |>
+    rename_with(function(x) gsub("q39", "anti_immigrant_attitudes", x, fixed = TRUE)) |>
+    rename(
+      w1_immigrant_followup = w1_q43) |>
+    rename(
+      w2_immigrant_followup = w2_q40) |>
+    rename(
+      w2_media_trust_rtl = w2_q27_1,
+      w2_media_trust_nos = w2_q27_2,
+      w2_media_trust_telegraaf = w2_q28_1,
+      w2_media_trust_nrc = w2_q28_2,
+      w2_media_trust_volkskrant = w2_q28_6,
+      w2_media_trust_nunl = w2_q28_11
+    )
+
+```
+
+## Make the dataset longer by introducing the "wave" column
+
+```{r}
+EU_2014_cleaned <- EU_2014_cleaned |>
+  pivot_longer(
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w4_"), starts_with("w5_")),
+    names_to = c("wave", ".value"),
+    names_pattern = "w(.)_(.*)"
+  )
+EU_2014_cleaned
+```
+
+## Testing values and splitting the original file
+
+```{r}
+
+#testing all variables for distinct values to identify variables that can be moved to the second file EXCLUDING variables that are part of waves
+distinct()
+
+# take all stable variables based on results of previous line 
+demographics <- EU_2014_renamed |>
+  select(
+    intnr, respnr, sample, waves,
+    starts_with("weight_"),  # Include all 4 weight columns
+    gender, age, education, region, family_size, pol2012
+  )
+
+# Now we take the rest of the variables
+survey_data <- EU_2014_renamed |>
+  select(!c(sample, waves,gender, age, education, region, family_size, pol2012, starts_with("weight_") )
+  )
+```
+
+## Primary key table for both?
+
+TBA
+
+QUESTIONS:
+
+Do we need to do joints? How would we approach it?
+
+To what extent should it be undersdtandable without the original documentation? As in do we need to include scales for variables in description
+
+# Content analysis
+
+## Libraries
+
+```{r}
+library(tidyverse)
+```
+
+## Reading in the data
+
+```{r}
+# read in the content analysis data 
+
+ca <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')                    
+```
+
+## Cleaning
+
+```{r}
+# lowercasing column names
+
+colnames(ca) <- tolower(colnames(ca))
+```
+
+```{r}
+
+# selecting variables needed for analysis
+
+ca <- ca |> 
+  select(
+    v4,
+    v3a,
+    v3b,
+    v3c,
+    v6_cleaned,
+    nl1a:nl1f,
+    nl2_1_1:nl2_4_3,
+    nl3,
+    nl4_1_1:nl4_4_3,
+    nl5
+  )
+
+#view(ca)
+```
+
+### Cleaning dates and times
+
+```{r}
+# replacing year numbers 
+
+ca$v3c <- replace(ca$v3c, ca$v3c == 14, values = 2014)
+ca$v3c <- replace(ca$v3c, ca$v3c == 13, values = 2013)
+
+#view(ca)
+```
+
+```{r}
+# using lubridate to set dates in date format
+
+ca <- ca |> 
+  mutate(date = make_datetime(v3c, v3b, v3a),.keep = "unused", .before = v4)
+
+```
+
+### Renaming variables
+
+```{r}
+
+#renaming variables
+
+ca <- ca |>
+  rename(
+    outlet = v4,
+    topic = v6_cleaned,
+    fear = nl1a,
+    anger = nl1b,
+    disgust = nl1c,
+    hope = nl1d,
+    frustration = nl1e,
+    surprise = nl1f,
+    mention_muslim_general_netherlands = nl2_1_1,
+    mention_muslim_general_elweshere = nl2_1_2,
+    mention_muslim_general_home = nl2_1_3,
+    mention_muslim_moroccans_netherlands = nl2_2_1,
+    mention_muslim_moroccans_elsewhere = nl2_2_2,
+    mention_muslim_moroccans_home = nl2_2_3,
+    mention_muslim_turkish_netherlands = nl2_3_1,
+    mention_muslim_turkish_elsewhere = nl2_3_2,
+    mention_muslim_turkish_home = nl2_3_3,
+    mention_muslim_other_netherlands = nl2_4_1,
+    mention_muslim_other_elsewhere = nl2_4_2,
+    mention_muslim_other_home = nl2_4_3,
+    mention_east_poles_netherlands = nl4_1_1,
+    mention_east_poles_elweshere = nl4_1_2,
+    mention_east_poles_home = nl4_1_3,
+    mention_east_eu_netherlands = nl4_2_1,
+    mention_east_eu_elweshere = nl4_2_2,
+    mention_east_eu_home = nl4_2_3,
+    mention_east_general_netherlands = nl4_3_1,
+    mention_east_general_elweshere = nl4_3_2,
+    mention_east_general_home = nl4_3_3,
+    mention_east_noneu_netherlands = nl4_4_1,
+    mention_east_noneu_elweshere = nl4_4_2,
+    mention_east_noneu_home = nl4_4_3,
+    evaluation_muslims = nl3,
+    evaluation_eastern_europeans = nl5
+    ) 
+
+```
+
+### Filtering rows needed
+
+```{r}
+# filtering rows needed for the analysis (Dutch media outlets)
+
+ca <- ca |>
+  filter(
+    (outlet == "NRC Handelsblad") |
+    (outlet == "de Volkskrant") |
+    (outlet == "de Telegraaf") |
+    (outlet == "NOS Journaal") |
+    (outlet == "RTL Nieuws") |
+    (outlet == "nu.nl")
+  )
+```
+
+### 
+
+```{r}
+# replacing blank cells with NA
+ca$evaluation_muslims[ca$evaluation_muslims==" "] <- NA
+ca$evaluation_eastern_europeans[ca$evaluation_eastern_europeans==" "] <- NA
+```
+
+```{r}
+# moving evaluation columns to the front to exclude them from pivoting
+ca <- ca |>
+  relocate(starts_with("evaluation"), .before = mention_muslim_general_netherlands)
+  
+```
+
+```{r}
+# create a mention column that will indicate whether or not a group is mentioned
+# create a type column that will indicate which group is mentioned
+ca <- ca |>  
+  pivot_longer(
+    cols = mention_muslim_general_netherlands:last_col(),   # Selects the mention muslim columns
+    names_to = "type",
+    values_to = "mention"
+  )
+  
+```
+
+```{r}
+# separating the type column to multiple variables
+ca <- ca |>  
+  separate_wider_delim(
+  type,
+  delim = "_",
+  names = c("trash","group", "subgroup", "location"),
+  )
+  
+```
+
+```{r}
+# droppin the trash column
+ca <- ca |>  
+ select(!trash)
+  
+```
+
+```{r}
+# changing categorical variables into factors
+ca |>
+ mutate_at(c(outlet:mention), as.factor)
+```
+
+```{r}
+# checking levels
+ca |>
+  distinct(outlet)
+
+#renaming levels
+
+```
