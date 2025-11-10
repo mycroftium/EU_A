@@ -131,35 +131,13 @@ EU_2014_cleaned <- EU_2014_cleaned |>
                 parse_number)
                 )
 
+# parsing barbora's variables
 EU_2014_cleaned <- EU_2014_cleaned |>
-  rename(
-    w1_most_important_issue = w1_q1,
-    w2_most_important_issue = w2_q1,
-    w3_most_important_issue = w3_q1,
-    w4_most_important_issue = w4_q1)
-
-EU_2014_cleaned <- EU_2014_cleaned |>
-    rename_with(function(x) gsub("w1_q54","w1_comfort_muslims", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w2_q48","w2_comfort_muslims", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
-    rename(
-      w1_ethnic_minority = w1_q68) |>
-    rename(
-      w1_ethnic_minority_specification = w1_q68_yes) |>
-    rename_with(function(x) gsub("q39", "anti_immigrant_attitudes", x, fixed = TRUE)) |>
-    rename(
-      w1_immigrant_followup = w1_q43) |>
-    rename(
-      w2_immigrant_followup = w2_q40) |>
-    rename(
-      w2_media_trust_rtl = w2_q27_1,
-      w2_media_trust_nos = w2_q27_2,
-      w2_media_trust_telegraaf = w2_q28_1,
-      w2_media_trust_nrc = w2_q28_2,
-      w2_media_trust_volkskrant = w2_q28_6,
-      w2_media_trust_nunl = w2_q28_11
-    )
+  mutate(across(c(w1_q54_1, w1_q54_2, w1_q54_3, w1_q56_1, w1_q56_2, w1_q56_3, 
+                w1_q42_1:w1_q42_5, w2_q48_1:w2_q48_3, 
+                w2_q49_1:w2_q49_3, w2_q39_1:w2_q39_5),
+                parse_number)
+                )
 
 ```
 
@@ -400,6 +378,36 @@ lookup <- c(pol_cyn, eu_att1, eu_att2, econ_eval, media_tv, media_paper, media_i
 
 rename(EU_2014_cleaned, all_of(lookup))
 EU_2014_cleaned
+
+EU_2014_cleaned <- EU_2014_cleaned |>
+  rename(
+    w1_most_important_issue = w1_q1,
+    w2_most_important_issue = w2_q1,
+    w3_most_important_issue = w3_q1,
+    w4_most_important_issue = w4_q1)
+
+EU_2014_cleaned <- EU_2014_cleaned |>
+    rename_with(function(x) gsub("w1_q54","w1_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q48","w2_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
+    rename(
+      w1_ethnic_minority = w1_q68) |>
+    rename(
+      w1_ethnic_minority_specification = w1_q68_yes) |>
+    rename_with(function(x) gsub("q39", "anti_immigrant_attitudes", x, fixed = TRUE)) |>
+    rename(
+      w1_immigrant_followup = w1_q43) |>
+    rename(
+      w2_immigrant_followup = w2_q40) |>
+    rename(
+      w2_media_trust_rtl = w2_q27_1,
+      w2_media_trust_nos = w2_q27_2,
+      w2_media_trust_telegraaf = w2_q28_1,
+      w2_media_trust_nrc = w2_q28_2,
+      w2_media_trust_volkskrant = w2_q28_6,
+      w2_media_trust_nunl = w2_q28_11
+    )
 
 ```
 
