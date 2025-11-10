@@ -1,0 +1,567 @@
+---
+title: "EU_A_cleaning"
+format: html
+editor: visual
+---
+
+## Importing librarys
+
+```{r}
+# Importing all the librarys needed
+library(ggplot2)
+library(readr)
+library(tidyverse)
+library(kDGLM)
+```
+
+## Importing the dataset
+
+```{r}
+# File path varies upon the exact place you put your document. (Not sure how to include the short file path.)
+
+EU_2014_cleaned <- read_csv('/Users/mycroftzhang/Downloads/Using R/EU2014/All waves GENERAL.csv')
+ 
+```
+
+## RQs for Mai
+
+1.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU, and their political cynicism developed throughout the EU election?\
+
+2.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU and their political cynicism related to their media use pattern?
+
+## Variables needed for Mai's analysis
+
+`Political cynicism`: Q10 (wave 1), Q07 (wave 2), Q11 (wave 3), Q13 (wave 4)
+
+\
+Can you indicate to what extent you agree or disagree with the following statements about politics in general?
+
+\[1 Strongly disagree … 7 Strongly agree\]
+
+1\. Almost all politicians will betray their ideals or break their promises if it increases their power. *7 = cynical*
+
+2\. Most politicians are in politics for personal gain. *7 = cynical*
+
+3\. Most politicians are honest with their constituents. *7 = not cynical*
+
+4\. Most politicians are dedicated, and we should be grateful to them for the work they do. *7 = not cynical*\
+
+`EU-attitudes`: Q26, Q27 (wave 1), Q22, Q23 (wave 2), Q28, Q29 (wave 3), Q31, Q32 (wave4)\
+Notes: In wave 1, 7 = pro EU for all *nine* items of Q26. In Q27, *7 = pro-EU* for item 1, 2, 3, 4, 9 ;while *7 = against EU* for item 5, 6, 7, 8.
+
+\
+`Economic evaluation`: Q12 (wave 1), Q09 (wave 2), Q13(wave 3), Q15 (wave 4)
+
+Question:\
+And if you think about the European Union (EU) as a whole, do you think the economic situation will be better or worse in 12 months' time?
+
+\[1 = much worse, 7 = much better\]
+
+\
+`self reported media exposure (TV)`: Q49 (wave 1), Q44 (wave 2) Q43 (wave 3) Q47 (wave 4)
+
+\
+How many days a week do you watch the following TV programs?
+
+\[0 days a week … 7 days a week\]
+
+1\. RTL News 7:30 PM
+
+2\. NOS News 8:00 PM
+
+3\. Hart van Nederland
+
+4\. PowNews
+
+5\. De Wereld Draait Door (The World Keeps Turning) 6. Nieuwsuur (News Hour)
+
+7\. EenVandaag (One Today)
+
+8\. Pauw & Witteman
+
+9\. RTL Late Night (with Humberto Tan)
+
+10\. Other TV news
+
+*\
+`self reported media exposure (newspapers)`: Q50 (wave 1) Q45 (wave 2) Q44 (wave 3) Q48 (wave 4)*
+
+\[0 days a week … 7 days a week\] *\
+*1. De Telegraaf
+
+2\. NRC Handelsblad
+
+3\. NRC Next
+
+4\. Algemeen Dagblad (AD)
+
+5\. Trouw
+
+6\. De Volkskrant
+
+7\. Metro
+
+8\. Spits
+
+9\. Een regionale of lokale krant
+
+10\. Nieuws op de radio
+
+`self reported media exposure (Internet)`: Q51 (wave 1) Q46 (wave 2) Q45 (wave 3) Q49 (wave 4)
+
+\[0 days a week … 7 days a week\]\
+1. Nieuwssites van kranten of TV-zenders op het internet
+
+2\. nu.nl
+
+3\. Andere nieuwssites op het internet
+
+4\. Blogs of discussieforums
+
+## Translating columns
+
+```{r}
+# giving columns informative names, translating dutch names
+EU_2014_renamed <- EU_2014_cleaned |>
+rename(
+  intnr = INTNR,
+  respnr = RESPNR,
+  sample = SAMPLE,
+  waves = WAVES,
+  weight_w1 = GEWICHTA1_w1,
+  weight_w2 = GEWICHTA1_w2,
+  weight_w3 = GEWICHTA1_w3,
+  weight_w4 = GEWICHTA1_w4,
+  gender = GSL,
+  age = LFT,
+  education = OPLA,
+  region = NIELSENCBS, 
+  family_size = GEZINSGROOTTE,
+  pol2012 = POL2012,
+  w1_date = w1_DATUM,
+  w1_time = w1_TIJD,
+  w2_date = w2_DATUM,
+  w2_time = w2_TIJD,
+  w3_date = w3_DATUM,
+  w3_time = w3_TIJD,
+  w4_date = w4_DATUM,
+  w4_time = w4_TIJD,
+) 
+EU_2014_renamed
+```
+
+## 1. Parsing values in cells
+
+In `Political cynicism` for instance, values includes both integer and string (e.g., "7 helemaal mee eens").\
+In this step, we will apply the third principle, namely *Each value must have its own cell* to this data set. More specifically, in the following variables:\
+`Political cynicism`:
+
+Items **3, 4** need to be reverse coded so that 7 = cynical (to be done in the following steps)
+
+*w1_q10_1* : *w1_q10_4;*
+
+*w2_q7_1* : *w2_q7_4;*
+
+*w3_q11*\_1 : *w3_q11_4;*
+
+*w4_q13_1* : *w4_q13_4*
+
+`EU-attitudes`:
+
+In the second set of question, Item 5, 6, 7, 8 need to be reverse coded so that 7 = pro-EU (to be done in the following steps)
+
+*w1_q26_1* : *w1_q26_9* & *w1_q27_1* : *w1_q27_9*
+
+*w2_q22_1 : w2_q22_9 & w2_q23_1 : w2_q23_9*
+
+*w3_q28_1 : w3_q28_9 & w3_q29_1 : w3_q29_9*
+
+w4_q31_1 : w4_q31_9 & w4_q32:1 : w4_q32_9\
+`Economic evaluation`:
+
+7 = much better
+
+w1_q12
+
+w2_q9
+
+w3_q13
+
+w4_q15\
+`self reported media exposure (TV)`:
+
+0 days a week to 7 days a week
+
+*w1_q49_1* : *w1_q26_10*
+
+*w2_q44_1* : *w2_q44_10*
+
+*w3_q43_1* : *w3_q43_10*
+
+*w4_q47_1* : *w4_q47_10*\
+`self reported media exposure (newspaper)`
+
+*idem.*
+
+*w1_q50_1* : *w1_q50_10*
+
+*w2_q45_1* : *w2_q45_10*
+
+*w3_q44_1* : *w3_q44_10*
+
+*w4_q48_1* : *w4_q48_10*\
+`self reported media exposure (Internet)`
+
+*idem.*
+
+*w1_q51_1* : *w1_q51_3*
+
+*w2_q46_1* : *w2_q46_3*
+
+*w3_q45_1* : *w3_q45_3*
+
+*w4_q49_1* : *w4_q49_3*\
+
+```{r}
+# First of all, all the value will be parsed in only numerical forms
+
+# We start with parsing variable: Political cynicism
+EU_2014_renamed <- EU_2014_renamed |> 
+  mutate(
+    across(c(
+              w1_q10_1, w1_q10_2, w1_q10_3, w1_q10_4,
+              w2_q7_1, w2_q7_2, w2_q7_3, w2_q7_4,
+              w3_q11_1, w3_q11_2, w3_q11_3, w3_q11_4,
+              w4_q13_1, w4_q13_2, w4_q13_3, w4_q13_4
+            ), parse_number)
+          )
+
+# Now parse variable: EU-attitude
+EU_2014_renamed <- EU_2014_renamed |>
+  mutate(across(c(w1_q26_1:w1_q26_9, w1_q27_1:w1_q27_9,
+                  w2_q22_1:w2_q22_9, w2_q23_1:w2_q23_9,
+                  w3_q28_1:w3_q28_9, w3_q29_1:w3_q29_9,
+                  w4_q31_1:w4_q31_9, w4_q32_1:w4_q32_9),
+                parse_number)
+               )
+
+# For variable: Economic evaluation
+EU_2014_renamed <- EU_2014_renamed |>
+  mutate(across(c(w1_q12, w2_q9, w3_q13, w4_q15),
+                parse_number)
+               )
+
+# For variable: self reported media exposure (TV)
+EU_2014_renamed <- EU_2014_renamed |>
+  mutate(across(c(w1_q49_1 : w1_q49_10,
+                  w2_q44_1 : w2_q44_10,
+                  w3_q43_1 : w3_q43_10,
+                  w4_q47_1 : w4_q47_10
+                  ),
+                parse_number)
+                )
+ # For variable: self reported media exposure (newspaper)
+EU_2014_renamed <- EU_2014_renamed |>
+  mutate(across(c(w1_q50_1 : w1_q50_10,
+                  w2_q45_1 : w2_q45_10,
+                  w3_q44_1 : w3_q44_10,
+                  w4_q48_1 : w4_q48_10
+                  ),
+                parse_number)
+                )
+# Finally, for variable: self reported media exposure (Internet)
+EU_2014_renamed <- EU_2014_renamed |>
+  mutate(across(c(w1_q51_1, w1_q51_2, w1_q51_5, w1_q51_6,
+                  w2_q46_1, w2_q46_2, w2_q46_5, w2_q46_6,
+                  w3_q45_1, w3_q45_2, w3_q45_5, w3_q45_6,
+                  w4_q49_1, w4_q49_2, w4_q49_5, w4_q49_6
+                  ),
+                parse_number)
+                )
+
+```
+
+## 2. Splitting the original file into two (principle 1)
+
+The first principle of data tidying is that *each type of case must have its own tibble.* In this data set, we achieve it by splitting the data set into two tibbles: 1) demographic 2) responses by waves.\
+
+```{r}
+# we first put all the needed demographic variables into tibble "demographics"
+demographics <- EU_2014_renamed |>
+  select(
+    intnr, respnr, sample, waves,
+    starts_with("weight_"),  # Include all 4 weight columns
+    gender, age, education, region, family_size, pol2012
+  )
+
+# Now collect all the waves responses under tibble "survey_data"
+survey_data <- EU_2014_renamed |>
+  select(
+    intnr, respnr,
+    matches("^w[1-4]_")
+  )
+
+```
+
+## 3. Standarising variable names
+
+(Principle 1, each variable must have its own column)
+
+Since the variable names in the document is in the format of "w1_q1_1" where the question number differs across different wave. We would like to standardise variable names.
+
+```{r}
+  pol_cyn = c(w1_polcyn_1 = "w1_q10_1",
+              w1_polcyn_2 = "w1_q10_2",
+              w1_polcyn_3 = "w1_q10_3",
+              w1_polcyn_4 = "w1_q10_4",
+              w2_polcyn_1 = "w2_q7_1",
+              w2_polcyn_2 = "w2_q7_2",
+              w2_polcyn_3 = "w2_q7_3",
+              w2_polcyn_4 = "w2_q7_4",
+              w3_polcyn_1 = "w3_q11_1",
+              w3_polcyn_2 = "w3_q11_2",
+              w3_polcyn_3 = "w3_q11_3",
+              w3_polcyn_4 = "w3_q11_4",
+              w4_polcyn_1 = "w4_q13_1",
+              w4_polcyn_2 = "w4_q13_2",
+              w4_polcyn_3 = "w4_q13_3",
+              w4_polcyn_4 = "w4_q13_4"
+              )
+  eu_att1 = c(w1_eu_att1_1 = "w1_q26_1",
+              w1_eu_att1_2 = "w1_q26_2",
+              w1_eu_att1_3 = "w1_q26_3",
+              w1_eu_att1_4 = "w1_q26_4",
+              w1_eu_att1_5 = "w1_q26_5",
+              w1_eu_att1_6 = "w1_q26_6",
+              w1_eu_att1_7 = "w1_q26_7",
+              w1_eu_att1_8 = "w1_q26_8",
+              w1_eu_att1_9 = "w1_q26_9",
+              w2_eu_att1_1 = "w2_q22_1",
+              w2_eu_att1_2 = "w2_q22_2",
+              w2_eu_att1_3 = "w2_q22_3",
+              w2_eu_att1_4 = "w2_q22_4",
+              w2_eu_att1_5 = "w2_q22_5",
+              w2_eu_att1_6 = "w2_q22_6",
+              w2_eu_att1_7 = "w2_q22_7",
+              w2_eu_att1_8 = "w2_q22_8",
+              w2_eu_att1_9 = "w2_q22_9",
+              w3_eu_att1_1 = "w3_q28_1",
+              w3_eu_att1_2 = "w3_q28_2",
+              w3_eu_att1_3 = "w3_q28_3",
+              w3_eu_att1_4 = "w3_q28_4",
+              w3_eu_att1_5 = "w3_q28_5",
+              w3_eu_att1_6 = "w3_q28_6",
+              w3_eu_att1_7 = "w3_q28_7",
+              w3_eu_att1_8 = "w3_q28_8",
+              w3_eu_att1_9 = "w3_q28_9",
+              w4_eu_att1_1 = "w4_q31_1",
+              w4_eu_att1_2 = "w4_q31_2",
+              w4_eu_att1_3 = "w4_q31_3",
+              w4_eu_att1_4 = "w4_q31_4",
+              w4_eu_att1_5 = "w4_q31_5",
+              w4_eu_att1_6 = "w4_q31_6",
+              w4_eu_att1_7 = "w4_q31_7",
+              w4_eu_att1_8 = "w4_q31_8",
+              w4_eu_att1_9 = "w4_q31_9"
+              )
+  eu_att2 = c(w1_eu_att2_1 = "w1_q27_1",
+              w1_eu_att2_2 = "w1_q27_2",
+              w1_eu_att2_3 = "w1_q27_3",
+              w1_eu_att2_4 = "w1_q27_4",
+              w1_eu_att2_5 = "w1_q27_5",
+              w1_eu_att2_6 = "w1_q27_6",
+              w1_eu_att2_7 = "w1_q27_7",
+              w1_eu_att2_8 = "w1_q27_8",
+              w1_eu_att2_9 = "w1_q27_9",
+              w1_eu_att2_1 = "w1_q27_1",
+              w1_eu_att2_2 = "w1_q27_2",
+              w1_eu_att2_3 = "w1_q27_3",
+              w1_eu_att2_4 = "w1_q27_4",
+              w1_eu_att2_5 = "w1_q27_5",
+              w1_eu_att2_6 = "w1_q27_6",
+              w1_eu_att2_7 = "w1_q27_7",
+              w1_eu_att2_8 = "w1_q27_8",
+              w1_eu_att2_9 = "w1_q27_9",
+              w3_eu_att2_1 = "w3_q29_1",
+              w3_eu_att2_2 = "w3_q29_2",
+              w3_eu_att2_3 = "w3_q29_3",
+              w3_eu_att2_4 = "w3_q29_4",
+              w3_eu_att2_5 = "w3_q29_5",
+              w3_eu_att2_6 = "w3_q29_6",
+              w3_eu_att2_7 = "w3_q29_7",
+              w3_eu_att2_8 = "w3_q29_8",
+              w3_eu_att2_9 = "w3_q29_9",
+              w4_eu_att2_1 = "w4_q32_1",
+              w4_eu_att2_2 = "w4_q32_2",
+              w4_eu_att2_3 = "w4_q32_3",
+              w4_eu_att2_4 = "w4_q32_4",
+              w4_eu_att2_5 = "w4_q32_5",
+              w4_eu_att2_6 = "w4_q32_6",
+              w4_eu_att2_7 = "w4_q32_7",
+              w4_eu_att2_8 = "w4_q32_8",
+              w4_eu_att2_9 = "w4_q32_9"
+             )
+  econ_eval = c(w1_econ_eval = "w1_q12",
+                w2_econ_eval = "w2_q9",
+                w3_econ_eval = "w3_q13",
+                w4_econ_eval = "w4_q15"
+              )
+  media_tv = c( w1_media_tv_1  = "w1_q49_1",
+                w1_media_tv_2  = "w1_q49_2",
+                w1_media_tv_3  = "w1_q49_3",
+                w1_media_tv_4  = "w1_q49_4",
+                w1_media_tv_5  = "w1_q49_5",
+                w1_media_tv_6  = "w1_q49_6",
+                w1_media_tv_7  = "w1_q49_7",
+                w1_media_tv_8  = "w1_q49_8",
+                w1_media_tv_9  = "w1_q49_9",
+                w1_media_tv_10 = "w1_q49_10",
+                w2_media_tv_1  = "w2_q44_1",
+                w2_media_tv_2  = "w2_q44_2",
+                w2_media_tv_3  = "w2_q44_3",
+                w2_media_tv_4  = "w2_q44_4",
+                w2_media_tv_5  = "w2_q44_5",
+                w2_media_tv_6  = "w2_q44_6",
+                w2_media_tv_7  = "w2_q44_7",
+                w2_media_tv_8  = "w2_q44_8",
+                w2_media_tv_9  = "w2_q44_9",
+                w2_media_tv_10 = "w2_q44_10",
+                w3_media_tv_1  = "w3_q43_1",
+                w3_media_tv_2  = "w3_q43_2",
+                w3_media_tv_3  = "w3_q43_3",
+                w3_media_tv_4  = "w3_q43_4",
+                w3_media_tv_5  = "w3_q43_5",
+                w3_media_tv_6  = "w3_q43_6",
+                w3_media_tv_7  = "w3_q43_7",
+                w3_media_tv_8  = "w3_q43_8",
+                w3_media_tv_9  = "w3_q43_9",
+                w3_media_tv_10 = "w3_q43_10",
+                w4_media_tv_1  = "w4_q47_1",
+                w4_media_tv_2  = "w4_q47_2",
+                w4_media_tv_3  = "w4_q47_3",
+                w4_media_tv_4  = "w4_q47_4",
+                w4_media_tv_5  = "w4_q47_5",
+                w4_media_tv_6  = "w4_q47_6",
+                w4_media_tv_7  = "w4_q47_7",
+                w4_media_tv_8  = "w4_q47_8",
+                w4_media_tv_9  = "w4_q47_9",
+                w4_media_tv_10 = "w4_q47_10"
+              )
+  media_paper = c(w1_media_np_1  = "w1_q50_1",
+                  w1_media_np_2  = "w1_q50_2",
+                  w1_media_np_3  = "w1_q50_3",
+                  w1_media_np_4  = "w1_q50_4",
+                  w1_media_np_5  = "w1_q50_5",
+                  w1_media_np_6  = "w1_q50_6",
+                  w1_media_np_7  = "w1_q50_7",
+                  w1_media_np_8  = "w1_q50_8",
+                  w1_media_np_9  = "w1_q50_9",
+                  w1_media_np_10 = "w1_q50_10",
+                  w2_media_np_1  = "w2_q45_1",
+                  w2_media_np_2  = "w2_q45_2",
+                  w2_media_np_3  = "w2_q45_3",
+                  w2_media_np_4  = "w2_q45_4",
+                  w2_media_np_5  = "w2_q45_5",
+                  w2_media_np_6  = "w2_q45_6",
+                  w2_media_np_7  = "w2_q45_7",
+                  w2_media_np_8  = "w2_q45_8",
+                  w2_media_np_9  = "w2_q45_9",
+                  w2_media_np_10 = "w2_q45_10",
+                  w3_media_np_1  = "w3_q44_1",
+                  w3_media_np_2  = "w3_q44_2",
+                  w3_media_np_3  = "w3_q44_3",
+                  w3_media_np_4  = "w3_q44_4",
+                  w3_media_np_5  = "w3_q44_5",
+                  w3_media_np_6  = "w3_q44_6",
+                  w3_media_np_7  = "w3_q44_7",
+                  w3_media_np_8  = "w3_q44_8",
+                  w3_media_np_9  = "w3_q44_9",
+                  w3_media_np_10 = "w3_q44_10",
+                  w4_media_np_1  = "w4_q48_1",
+                  w4_media_np_2  = "w4_q48_2",
+                  w4_media_np_3  = "w4_q48_3",
+                  w4_media_np_4  = "w4_q48_4",
+                  w4_media_np_5  = "w4_q48_5",
+                  w4_media_np_6  = "w4_q48_6",
+                  w4_media_np_7  = "w4_q48_7",
+                  w4_media_np_8  = "w4_q48_8",
+                  w4_media_np_9  = "w4_q48_9",
+                  w4_media_np_10 = "w4_q48_10"
+                 )
+  media_int = c(w1_media_int_1 = "w1_q51_1",
+                w1_media_int_2 = "w1_q51_2",
+                w1_media_int_3 = "w1_q51_5",
+                w1_media_int_4 = "w1_q51_6",
+                w2_media_int_1 = "w2_q46_1",
+                w2_media_int_2 = "w2_q46_2",
+                w2_media_int_3 = "w2_q46_5",
+                w2_media_int_4 = "w2_q46_6",
+                w3_media_int_1 = "w3_q45_1",
+                w3_media_int_2 = "w3_q45_2",
+                w3_media_int_3 = "w3_q45_5",
+                w3_media_int_4 = "w3_q45_6",
+                w4_media_int_1 = "w4_q49_1",
+                w4_media_int_2 = "w4_q49_2",
+                w4_media_int_3 = "w4_q49_5",
+                w4_media_int_4 = "w4_q49_6"
+                )
+lookup <- c(pol_cyn, eu_att1, eu_att2, econ_eval, media_tv, media_paper, media_int)
+
+rename(survey_data, all_of(lookup))
+survey_data
+```
+
+alternative version:
+
+```{r}
+survey_data_standard <- survey_data |> 
+# we first start the standardization with variable Political cynicism
+rename_with(function(x) str_replace(x, "w1_q10", "w1_polcyn"), starts_with("w1_q10")) |>
+rename_with(function(x) str_replace(x, "w2_q7", "w2_polcyn"), starts_with("w2_q7")) |> 
+rename_with(function(x) str_replace(x, "w3_q11", "w3_polcyn"), starts_with("w3_q11")) |>
+rename_with(function(x) str_replace(x, "w4_q13", "w4_polcyn"), starts_with("w4_q13")) |>
+# now rename the EU-attitudes 1
+rename_with(function(x) str_replace(x, "w1_q26", "w1_eu_att1"), starts_with("w1_q26")) |>
+rename_with(function(x) str_replace(x, "w2_q22", "w2_eu_att1"), starts_with("w2_q22")) |>
+rename_with(function(x) str_replace(x, "w3_q28", "w3_eu_att1"), starts_with("w3_q28")) |>
+rename_with(function(x) str_replace(x, "w4_q31", "w4_eu_att1"), starts_with("w4_q31")) |>
+# second set of EU attitude questions
+rename_with(function(x) str_replace(x, "w1_q27", "w1_eu_att2"), starts_with("w1_q27")) |>
+rename_with(function(x) str_replace(x, "w2_q23", "w2_eu_att2"), starts_with("w2_q23")) |>
+rename_with(function(x) str_replace(x, "w3_q29", "w3_eu_att2"), starts_with("w3_q29")) |>
+rename_with(function(x) str_replace(x, "w4_q32", "w4_eu_att2"), starts_with("w4_q32")) |>
+# Economic evaluation
+rename_with(function(x) str_replace(x, "w1_q12", "w1_econ_eval"), starts_with("w1_q12")) |>
+rename_with(function(x) str_replace(x, "w2_q9",  "w2_econ_eval"), starts_with("w2_q9"))  |>
+rename_with(function(x) str_replace(x, "w3_q13", "w3_econ_eval"), starts_with("w3_q13")) |>
+rename_with(function(x) str_replace(x, "w4_q15", "w4_econ_eval"), starts_with("w4_q15")) |>
+# self reported media exposure (TV)
+rename_with(function(x) str_replace(x, "w1_q49", "w1_media_tv"), starts_with("w1_q49")) |>
+rename_with(function(x) str_replace(x, "w2_q44", "w2_media_tv"), starts_with("w2_q44")) |>
+rename_with(function(x) str_replace(x, "w3_q43", "w3_media_tv"), starts_with("w3_q43")) |>
+rename_with(function(x) str_replace(x, "w4_q47", "w4_media_tv"), starts_with("w4_q47")) |>
+# self reported media exposure (newspaper)
+rename_with(function(x) str_replace(x, "w1_q50", "w1_media_np"), starts_with("w1_q50")) |>
+rename_with(function(x) str_replace(x, "w2_q45", "w2_media_np"), starts_with("w2_q45")) |>
+rename_with(function(x) str_replace(x, "w3_q44", "w3_media_np"), starts_with("w3_q44")) |>
+rename_with(function(x) str_replace(x, "w4_q48", "w4_media_np"), starts_with("w4_q48")) |>
+# finally, self reported media exposure (Internet)
+rename_with(function(x) str_replace(x, "w1_q51", "w1_media_int"), starts_with("w1_q51")) |>
+rename_with(function(x) str_replace(x, "w2_q46", "w2_media_int"), starts_with("w2_q46")) |>
+rename_with(function(x) str_replace(x, "w3_q45", "w3_media_int"), starts_with("w3_q45")) |>
+rename_with(function(x) str_replace(x, "w4_q49", "w4_media_int"), starts_with("w4_q49"))
+```
+
+## 4. Make the dataset longer by introducing the "wave" column
+
+principle 2: each observation must have its own row
+
+```{r}
+survey_long <- survey_data_standard |>
+  pivot_longer(
+    cols = w1_polcyn_1:last_col(),   # Selects from this column to the very last one
+    names_to = c("wave", ".value"),
+    names_pattern = "w(.)_(.*)"
+  )
+survey_long
+```
