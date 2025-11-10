@@ -460,12 +460,6 @@ To what extent should it be undersdtandable without the original documentation? 
 
 # Content analysis 
 
----
-title: "content_anaylsis_cleaned"
-format: html
-editor: visual
----
-
 ## Libraries
 
 ```{r}
