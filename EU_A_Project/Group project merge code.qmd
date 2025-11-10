@@ -20,13 +20,18 @@ library(tidyverse)
 EU_2014_cleaned <- read_csv('EU2014/All waves GENERAL.csv')
 ```
 
-## RQs overview BÁRA AND SÁRA NEED TO ADD RQ
+## RQs overview SÁRA NEEDS TO ADD RQ
 
 1.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU, and their political cynicism developed throughout the EU election?
 
 2.  To what extent is people's attitude toward the EU, people's economic evaluation toward the EU and their political cynicism related to their media use pattern?
 
 3.  How does the intention to vote differ between EU and local elections, and what is the relationship between the difference and national identity, attitude towards globalisation and anti-immigrant attitudes 6 months prior to the EU elections?
+
+Barbora:
+
+1. How does the readership of Dutch media outlets differ in their attitudes regarding migration?
+2. How do Dutch media outlets cover migration?
 
     \
 
@@ -57,7 +62,8 @@ rename(
   w4_time = w4_TIJD,
 ) 
 
-colnames(EU_2014_cleaned) <- tolower(colnames(EU_2014_cleaned))
+colnames(EU_2014_cleaned) <- tolower(colnames(EU_2014_cleaned)) # this function changes all column names to lowercase 
+                                                                # (more consistent and easy to use)
 ```
 
 ## Parsing values in cells - LETS ASK TOMORROW (based on that Bára's part either stays or needs to be rewritten)
@@ -124,6 +130,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
                   ),
                 parse_number)
                 )
+
 EU_2014_cleaned <- EU_2014_cleaned |>
   rename(
     w1_most_important_issue = w1_q1,
