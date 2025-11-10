@@ -18,7 +18,6 @@ W2_Q28 Media trust \[NP;radio;interet\]
 
 **Readership immigration attitudes**
 
-![](images/clipboard-805686383.png)
 
 W2_Q42 Anti-immigrant attitudes
 
@@ -44,7 +43,6 @@ W1_Q43 Immigrant follow up
 
 Choropleth Map
 
-![](images/clipboard-2845117677.png)
 
 W2_Q28 Media trust \[NP;radio;interet\]
 
@@ -54,11 +52,9 @@ NIELSENCBS (region)
 
 **Immigration stories proportion over time**
 
-![](images/clipboard-2649872974.png)
 
 **Immigration stories emotion**
 
-![](images/clipboard-1642792659.png)
 
 ## Variables Needed
 
@@ -157,22 +153,15 @@ library(tidyverse)
 
 raw_data <- read_csv('EU2014/All waves GENERAL.csv')
 
-# read in the content analysis data 
-
-ca <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')                    
 ```
 
 #### Renaming columns
 
 ```{r}
-# panel survey
+# giving columns informative names, translating dutch names, lowercasing names
 
 df <- raw_data |>
 rename(
-  intnr = INTNR,
-  respnr = RESPNR,
-  sample = SAMPLE,
-  waves = WAVES,
   weight_w1 = GEWICHTA1_w1,
   weight_w2 = GEWICHTA1_w2,
   weight_w3 = GEWICHTA1_w3,
@@ -182,7 +171,6 @@ rename(
   education = OPLA,
   region = NIELSENCBS, 
   family_size = GEZINSGROOTTE,
-  pol2012 = POL2012,
   w1_date = w1_DATUM,
   w1_time = w1_TIJD,
   w2_date = w2_DATUM,
@@ -195,9 +183,6 @@ rename(
 
 colnames(df) <- tolower(colnames(df))
 
-# content analysis
-
-colnames(ca) <- tolower(colnames(ca))
 ```
 
 #### Selecting the variables we need
@@ -269,12 +254,12 @@ colnames(ca) <- tolower(colnames(ca))
 +-------------------------------------------+-----------+------------+---------+---------+
 | (Co) Gender                               | GSL       |            |         |         |
 +-------------------------------------------+-----------+------------+---------+---------+
-| (Co) Income                               |   Q65     |            |         |         |
+| (Co) Income                               | Q65     |            |         |         |
 +-------------------------------------------+-----------+------------+---------+---------+
 
 *Panel data*
 
-Only Barbora variables:
+Only Barbora's variables:
 
 ```{r}
 
@@ -322,69 +307,11 @@ df <- df |>
 #view(df)
 ```
 
-*Content analysis data*
-
-```{r}
-
-ca <- ca |> 
-  select(
-    v4,
-    v3a,
-    v3b,
-    v3c,
-    v6_cleaned,
-    nl1a:nl1f,
-    nl2_1_2:nl2_4_3,
-    nl3,
-    nl4_1_1:nl4_4_3,
-    nl5
-  )
-
-#view(ca)
-```
-
-#### Splitting the dataset
-
-**Case types in the data**
-
-*Participant information*
-
-+-------------------------------------------------+---------------------+
-| Variable                                        | Name in the dataset |
-+=================================================+=====================+
-| Gender                                          | gender              |
-+-------------------------------------------------+---------------------+
-| Age                                             | age                 |
-+-------------------------------------------------+---------------------+
-| for how many waves we have information          | waves               |
-+-------------------------------------------------+---------------------+
-| general or youth sample                         | sample              |
-+-------------------------------------------------+---------------------+
-| Education                                       | education           |
-+-------------------------------------------------+---------------------+
-| Region                                          | region              |
-+-------------------------------------------------+---------------------+
-| Family size                                     | family_size         |
-+-------------------------------------------------+---------------------+
-| how the participant voted in the 2012 elections | pol2012             |
-+-------------------------------------------------+---------------------+
-|                                                 |                     |
-+-------------------------------------------------+---------------------+
-
-*Participant per wave: Attitude, knowledge, and some demographic questions*
-
-intnr
-
-respnr
-
-weights
-
-wave date and wave time (w1_date, w1_time)
 
 #### Parsing the numeric variables
 
 ```{r}
-view(df)
+#view(df)
 # putting the nonparsable variables first:
 df <- df |> 
   relocate(w1_q68, w1_q68_yes, w1_q43,w2_q40:w2_q28_11, .after = w4_q1)
@@ -397,7 +324,6 @@ df <- df |>
 #view(df)
 ```
 
-#### Cleaning dates and times
 
 ```{r}
 # using lubridate to set dates in date format
@@ -407,55 +333,87 @@ df <- df |>
     across(c(w1_date, w2_date, w3_date, w4_date), ymd)
   )
 
-# the content analysis data
-ca <- ca |> 
-  mutate(date = make_datetime(v3c, v3b, v3a),.keep = "unused", .before = v4)
-
-#view(df)
 ```
 
 #### Lengthening the dataset
 
 I'm asking myself whether this is wise because there's only a few questions that have multiple waves
 
-+----------------------------------------+---------+------------+---------+---------+
-| **Most important issue**               | **Q01** | **Q01**    | **Q01** | **Q01** |
-+----------------------------------------+---------+------------+---------+---------+
-| **W1_Q54 Intergroup comfort: Muslims** | **Q54** | **Q54**    |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **W1_Q56 Intergroup comfort: Poles**   | **Q56** | **Q56**    |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **W1_Q68 Ethnic minority**             | **Q68** |            |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **W1_Q42 Anti-immigrant attitudes**    | **Q42** | **Q39**    |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **W1_Q43 Immigrant follow up**         | **Q43** | **Q43**    |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **w2_q27_1 RTL Nieuws 19.30**          |         | **Q27_1**  |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **w2_q27_2 NOS Journaal 20.00**        |         | **Q27_2**  |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **w2_q28_1 De Telegraaf**              |         | **Q28_1**  |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **w2_q28_2 NRC Handelsblad**           |         | **Q28_2**  |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **w2_q28_6 De Volkskrant**             |         | **Q28_6**  |         |         |
-+----------------------------------------+---------+------------+---------+---------+
-| **w2_q28_11 nu.nl**                    |         | **Q28_11** |         |         |
-+----------------------------------------+---------+------------+---------+---------+
+#### Renaming variables
 
 ```{r}
-# pivoting the first question
 
 df <- df |>
+  rename(
+    w1_most_important_issue = w1_q1,
+    w2_most_important_issue = w2_q1,
+    w3_most_important_issue = w3_q1,
+    w4_most_important_issue = w4_q1)
+
+df <- df |>
+    rename_with(function(x) gsub("w1_q54","w1_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q48","w2_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
+    rename(
+      w1_ethnic_minority = w1_q68) |>
+    rename(
+      w1_ethnic_minority_specification = w1_q68_yes) |>
+    rename_with(function(x) gsub("q39", "anti_immigrant_attitudes", x, fixed = TRUE)) |>
+    rename(
+      w1_immigrant_followup = w1_q43) |>
+    rename(
+      w2_immigrant_followup = w2_q40) |>
+    rename(
+      w2_media_trust_rtl = w2_q27_1,
+      w2_media_trust_nos = w2_q27_2,
+      w2_media_trust_telegraaf = w2_q28_1,
+      w2_media_trust_nrc = w2_q28_2,
+      w2_media_trust_volkskrant = w2_q28_6,
+      w2_media_trust_nunl = w2_q28_11
+    )
+
+```
+
+
+Pivoting the survey dataset, introducing the "wave" column
+
+```{r}
+
+df <- df |>  
   pivot_longer(
-    cols = c(w1_q1:w4_q1),
-    names_to = "wave",
-    values_to = "q1",
-    names_prefix = "w"
+    cols = w1_date:last_col(),   # Selects from this column to the very last one
+    names_to = c("wave", ".value"),
+    names_pattern = "w(.)_(.*)"
   )
 
-# changing wave class to factor
+```
+
+Changing the categorical variables into factors
+
+```{r}
+df|>
+  select(!c(intnr, respnr, age, family_size, date, time, most_important_issue, ethnic_minority_specification, immigrant_followup)) |>
+  is.null()
+
+ df |>
+    select(!c(intnr, respnr, age, family_size, date, time, most_important_issue, ethnic_minority_specification, immigrant_followup)) |>
+    mutate(across(), .fns = as_factor())
+```
+
+
+```{r}
+# changing categorical variables into factors
+
+df |> 
+  mutate(
+    across(c(w2_media_trust_rtl:w2_anti_immigrant_attitudes_5), as_factor())
+  )
+
+```
+
+
+```{# changing wave class to factor}
 
 df <- df |>
   mutate(
@@ -475,62 +433,7 @@ df <- df |>
   ))
 ```
 
-**Trying to do the same for the other variables while putting their wave information into the wave column**
-
 ```{r}
-
-# lengthening the Q56 and 49 data
-
-df <- df |>
-  pivot_longer(
-    cols = c(w1_q56_1:w1_q56_3, w2_q49_1:w2_q49_3),
-    names_to = c("wave_comfort_poles",".value"),
-#    names_pattern = "",
-#    names_prefix = "w",
-    names_sep = 3,
-#    names_repair = "unique"
-  ) 
-#colnames(df)
-# changing wave_56 class to factor
-
-df <- df |>
-  mutate(
-    wave_comfort_poles = as_factor(wave_comfort_poles)
-  )
-
-# changing values of the factors
-
-df <- df |>
-  mutate(
-    wave_comfort_poles = fct_recode(
-      wave_comfort_poles,
-      "1" = "w1_",
-      "2" = "w2_"
-  )) 
-
-# df |>
-# select(wave_comfort_poles)  add this line to view only the recoded column
-```
-
-```{r}
-# lengthening the Q54 and Q48 data
-
-df <- df |>
-  pivot_longer(
-    cols = c(w1_q54_1:w1_q54_3, w2_q48_1:w2_q48_3),
-    names_to = c("wave_comfort_muslims",".value"),
-#    names_pattern = "",
-#    names_prefix = "w",
-    names_sep = 3,
-#    names_repair = "unique"
-  ) 
-#colnames(df)
-# changing wave_56 class to factor
-
-df <- df |>
-  mutate(
-    wave_comfort_muslims = as_factor(wave_comfort_muslims)
-  )
 
 # changing values of the factors
 
@@ -542,6 +445,6 @@ df <- df |>
       "2" = "w2_"
   )) 
 
- df |>
-select(wave_comfort_muslims)  add this line to view only the recoded column
 ```
+
+
