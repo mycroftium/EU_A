@@ -1,0 +1,101 @@
+---
+title: "EU_A_new"
+format: html
+editor: visual
+---
+
+## Group assignment
+
+The aim of this group assignment is to tidy both files so that they adhere to all four data tidying principles.
+
+1.  Each type of case must have its own tibble
+
+2.  Each observation must have its own row
+
+3.  Each variable must have its own column
+
+4.  Each value must have its own cell.
+
+Mai's RQ:
+
+*RQ1: To what extent is people's attitude toward the EU and their political cynicism developed throughout the EU election?*
+
+*RQ2: To what extent is people's attitude toward the EU and their political cynicism related to the media content they were exposed to?*
+
+In the All_Waves document, variables needed:
+
+`Political cynicism`: Q10 (wave 1), Q07 (wave 2), Q11 (wave 3), Q13 (wave 4)\
+`EU-attitudes`: Q26, Q27 (wave 1), Q22, Q23 (wave 2), Q28, Q29 (wave 3), Q31, Q32 (wave4)Notes: In wave 1, 7 = pro EU for all nine items of Q26. In Q27, 7 = pro-EU for item 1, 2, 3, 4, 9 ;while 7 = against EU for item 5, 6, 7, 8.
+
+`self reported media exposure (TV)`: Q49 (wave 1), Q44 (wave 2) Q43 (wave 3) Q47 (wave 4)
+
+*`self reported media exposure (newspapers)`: Q50 (wave 1) Q45 (wave 2) Q44 (wave 3) Q48 (wave 4)*
+
+`self reported media exposure (Internet)`: Q51 (wave 1) Q46 (wave 2) Q45 (wave 3) Q49 (wave 4)
+
+In the content analysis documents, variables needed:
+
+`V11`: How does the specific media evaluate the EU
+
+`V12`: How does the specific media evaluate the European Parliament
+
+`V13`: If the specific media mention a certain aspect related to the state of democracy in the EU and how do they evaluate it.
+
+Bará's RQs:
+
+Sará's RQs:
+
+## 1. Rename variables
+
+In the raw file, most of the variable names are structured in such a way that it has different question number in different waves.
+
+For instance: `Political cynicism`: Q10 (wave 1), Q07 (wave 2), Q11 (wave 3), Q13 (wave 4).
+
+Therefore, it is easier for further tidying if we capture all four questions measuring a certain variable in different waves and rename them into a consistent name e.g., `w1_polcyn_1`, `w2_polcyn_2`, etc.
+
+This data tidying process main tackles principle 1: Each type of case must have its own tibble
+
+## 2. Split tibble (Principle 1)
+
+```{r}
+# we first split the ALL_WAVES df into two tibbles: "demographic" & "waves"
+
+
+
+# We then split the content analysis df into two tibbles: the variables that we need and the one that will not be cleaned
+
+
+# Finally, we split the "waves" df into two tibbles, the one contains variabels that we need and the other that contains variables that will not be used
+
+
+```
+
+## 3. Pivot_longer all the items information (Principle 2)
+
+In the new tibble "waves", we see many variables that are measured with several items. This violates the data tidying principle 2, namely *each observation must have its own row*. To address this, we use function `pivot_longer()`. **(items)**
+
+```{r}
+# pivot_longer() tackling items. The code should create a new column: item_variablename
+
+
+```
+
+Now further applying the second principle, we should also deal with the waves information within the column's name. (**waves**)
+
+```{r}
+# pivot_longer() tackling waves information. This code should create a new column: wave capturing in which wave is this certain input collected
+
+```
+
+## 4. Separate numbers with labels (Principle 4)
+
+Principle 4 of the tidy tidying principle is: Each value must have its own cell.
+
+We should get rid of the textual explanation within each input (e.g., 1 helemaal mee oneens) by creating a new column capturing the label information.
+
+```{r}
+# this code should create a new column to capture the label information
+
+```
+
+## 4. In the content analysis we use separate_wider (Principle 3)
