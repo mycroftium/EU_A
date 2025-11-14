@@ -53,20 +53,114 @@ For instance: `Political cynicism`: Q10 (wave 1), Q07 (wave 2), Q11 (wave 3), Q1
 
 Therefore, it is easier for further tidying if we capture all four questions measuring a certain variable in different waves and rename them into a consistent name e.g., `w1_polcyn_1`, `w2_polcyn_2`, etc.
 
-This data tidying process main tackles principle 1: Each type of case must have its own tibble
+This data tidying process main tackles principle 1: Each type of case must have its own tibble.
+
+First, we import the data sets.
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+# Import two data sets. Change the path name to the relative ones if needed
+EU_2014 <- read.csv('/Users/mycroftzhang/Downloads/Using R/EU2014/All waves GENERAL.csv')
+content_analysis <- read.csv('/Users/mycroftzhang/Downloads/Using R/EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
+```
+
+Now rename variables:
+
+```{r}
+# giving columns informative names, translating dutch names
+EU_2014_renamed <- EU_2014 |>
+rename(
+  intnr = INTNR,
+  respnr = RESPNR,
+  sample = SAMPLE,
+  waves = WAVES,
+  weight_w1 = GEWICHTA1_w1,
+  weight_w2 = GEWICHTA1_w2,
+  weight_w3 = GEWICHTA1_w3,
+  weight_w4 = GEWICHTA1_w4,
+  gender = GSL,
+  age = LFT,
+  education = OPLA,
+  region = NIELSENCBS, 
+  family_size = GEZINSGROOTTE,
+  pol2012 = POL2012,
+  w1_date = w1_DATUM,
+  w1_time = w1_TIJD,
+  w2_date = w2_DATUM,
+  w2_time = w2_TIJD,
+  w3_date = w3_DATUM,
+  w3_time = w3_TIJD,
+  w4_date = w4_DATUM,
+  w4_time = w4_TIJD,
+) 
+colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed)) 
+colnames(content_analysis) <- tolower(colnames(content_analysis))
+# this function changes all column names to lowercase 
+# (more consistent and easy to use)
+```
 
 ## 2. Split tibble (Principle 1)
 
 ```{r}
-# we first split the ALL_WAVES df into two tibbles: "demographic" & "waves"
+# we first split the ALL_WAVES df into two tibbles: "demographic" & "all_waves"
 
+demographic <- EU_2014_renamed |> 
+ select(
+      intnr, respnr, sample, waves,
+      starts_with("weight_"),  # Include all 4 weight columns
+      gender, age, education, region, family_size, pol2012)
 
+all_waves <- EU_2014_renamed |> 
+  select(
+      intnr, respnr, sample, waves,
+      matches("^w[1-4]_") 
+  )
 
 # We then split the content analysis df into two tibbles: the variables that we need and the one that will not be cleaned
 
+ca_needed <- content_analysis |> 
+  select(
+        v11, v12, v13, # Mai's variables
+        v4, v3a, v3b, v3c, v6_cleaned, #Barbora's variables
+        nl1a:nl1f, 
+        nl2_1_1:nl2_4_3, 
+        nl3, 
+        nl4_1_1:nl4_4_3, 
+        nl5
+        # Sara's variables
+  )
 
-# Finally, we split the "waves" df into two tibbles, the one contains variabels that we need and the other that contains variables that will not be used
+# Finally, we split the "all_waves" df into two tibbles, the one contains variabels that we need for further analysis and the other that contains variables that will not be used
 
+waves <- all_waves |> 
+  select(
+        intnr, respnr, sample, waves,
+        w1_date, w1_time, w2_date, w2_time, w3_date,
+        w3_time, w4_date, w4_time, 
+        w1_q1, w2_q1, w3_q1, w4_q1, # Barbora's variables
+        starts_with("w1_q54"), starts_with("w1_q56"),
+        starts_with("w1_q68"), starts_with("w1_q42"),
+        starts_with("w1_q43"), starts_with("w2_q48"),
+        starts_with("w2_q49"), starts_with("w2_q39"),
+        starts_with("w2_q40"), 
+        w1_q10_1:w1_q10_4, w2_q7_1:w2_q7_4, # Mai's variables
+        w3_q11_1:w3_q11_4, w4_q13_1:w4_q13_4,
+        w1_q26_1:w1_q26_9, w1_q27_1:w1_q27_9,
+        w2_q22_1:w2_q22_9, w2_q23_1:w2_q23_9,
+        w3_q28_1:w3_q28_9, w3_q29_1:w3_q29_9,
+        w4_q31_1:w4_q31_9, w4_q32_1:w4_q32_9,
+        w1_q49_1:w1_q26_10, w2_q44_1:w2_q44_10,
+        w3_q43_1:w3_q43_10, w4_q47_1:w4_q47_10,
+        w1_q50_1:w1_q50_10, w2_q45_1 : w2_q45_10,
+        w3_q44_1:w3_q44_10, w1_q51_1:w1_q51_3,
+        w2_q46_1:w2_q46_3, w3_q45_1:w3_q45_3,
+        w4_q49_1:w4_q49_3,
+        # Sara's variables
+        
+  )
 
 ```
 
@@ -83,7 +177,7 @@ In the new tibble "waves", we see many variables that are measured with several 
 Now further applying the second principle, we should also deal with the waves information within the column's name. (**waves**)
 
 ```{r}
-# pivot_longer() tackling waves information. This code should create a new column: wave capturing in which wave is this certain input collected
+# pivot_longer() tacklles waves information. This code should create a new column: wave capturing in which wave is this certain input collected
 
 ```
 
