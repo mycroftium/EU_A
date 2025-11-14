@@ -76,25 +76,28 @@ Variables Barbora
 
 Sará's RQs:
 
+How does the intention to vote differ between EU and local elections, and what is the relationship between the difference and national identity, attitude towards globalisation and anti-immigrant attitudes 6 months prior to the EU elections in regards to the media outlet voters are consuming content from?
+
 Sará's RQs:
 
-| ***Panel survey*** |        |        |        |        |
-|--------------------|--------|--------|--------|--------|
-| **Variable**       | Wave 1 | Wave 2 | Wave 3 | Wave 4 |
-|                    |        |        |        |        |
-|                    |        |        |        |        |
-|                    |        |        |        |        |
-|                    |        |        |        |        |
-|                    |        |        |        |        |
+| ***Panel survey***             |        |        |        |        |
+|--------------------------------|--------|--------|--------|--------|
+| **Variable**                   | Wave 1 | Wave 2 | Wave 3 | Wave 4 |
+| National identity              | Q05    |        |        |        |
+| Attitudes globalisation        | Q32    |        |        |        |
+| Vote intention EU              | Q34    | Q35    | Q07    |        |
+| Vote intention local elections | Q39    |        |        |        |
+| Anti-immigrant attitudes       | Q42    | Q39    |        |        |
+| Highest completed education    | Q61    |        |        |        |
+| Income                         | Q65    |        |        |        |
+| Employment status              | Q67    |        |        |        |
+| Age                            |        |        |        |        |
+| Gender                         |        |        |        |        |
 
 | *Content analysis* |           |
 |--------------------|-----------|
 | **Variable**       | **Label** |
-|                    |           |
-|                    |           |
-|                    |           |
-|                    |           |
-|                    |           |
+| Outlet             | V4        |
 
 ## 1. Rename variables
 
