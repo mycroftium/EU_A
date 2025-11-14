@@ -247,7 +247,26 @@ We should get rid of the textual explanation within each input (e.g., 1 helemaal
 
 ```{r}
 # this code should create a new column to capture the label information
+# creating a vector capturing column names
+cols_for_separation <- EU_2014_cleaned |>
+  select_if(
+    function(col) any(grep("1 ^h|v|i", col))) |>
+  select(!w1_q1) |>
+  colnames()
 
+cols_for_separation
+```
+
+```{r}
+EU_2014_cleaned |>
+  separate_wider_delim(
+    cols = all_of(cols_for_separation),
+    delim = stringr::regex(" (?=h|v|i)"), 
+    names_sep = "_",
+    too_few = "align_start",
+#  too_many = "merge",
+  cols_remove = TRUE
+)
 ```
 
 ## 5. Pivot_longer all the items information (Principle 2)
