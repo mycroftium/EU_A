@@ -128,10 +128,6 @@ Now rename variables:
 # giving columns informative names, translating dutch names
 EU_2014_renamed <- EU_2014 |>
 rename(
-  intnr = INTNR,
-  respnr = RESPNR,
-  sample = SAMPLE,
-  waves = WAVES,
   weight_w1 = GEWICHTA1_w1,
   weight_w2 = GEWICHTA1_w2,
   weight_w3 = GEWICHTA1_w3,
@@ -155,7 +151,62 @@ colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed))
 colnames(content_analysis) <- tolower(colnames(content_analysis))
 # this function changes all column names to lowercase 
 # (more consistent and easy to use)
-```
+
+
+EU_2014_cleaned <- EU_2014_cleaned |> 
+    rename_with(function(x) gsub("w1_q5", "w1_national_identity", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q32", "w1_attitude_global", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q34", "w1_vote_intention_eu", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q39", "w1_vote_intention_local", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q42", "w1_anti_immigrant", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q10", "w1_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q7", "w2_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q11", "w3_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q13", "w4_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q26", "w1_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q22", "w2_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q28", "w3_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q31", "w4_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q27", "w1_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q29", "w3_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q29", "w3_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q32", "w4_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q49", "w1_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q44", "w2_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q43", "w3_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q47", "w4_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q50", "w1_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q45", "w2_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q44", "w3_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q48", "w4_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q51", "w1_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q46", "w2_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q45", "w3_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q49", "w4_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q1", "w1_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q1", "w2_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q1", "w3_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q1", "w4_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q54", "w1_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q48", "w2_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
+    rename(
+      w1_ethnic_minority = w1_q68) |>
+    rename(
+      w1_ethnic_minority_specification = w1_q68_yes) |>
+    rename_with(function(x) gsub("q39", "anti_immigrant_attitudes", x, fixed = TRUE)) |>
+    rename(
+      w1_immigrant_followup = w1_q43) |>
+    rename(
+      w2_immigrant_followup = w2_q40)
+    rename(
+      w1_highest_completed_education = w1_q61) |>
+    rename(
+      w1_income = w1_q65) |>    
+    rename(
+      w1_employment_status = w1_q67)
+ ```
 
 ## 2. Select the variables that will be used in the analysis (Principle 1)
 
