@@ -43,6 +43,37 @@ In the content analysis documents, variables needed:
 
 Bará's RQs:
 
+1.  How does the readership of Dutch media outlets differ in their attitudes regarding migration?
+
+2.  How do Dutch media outlets cover migration?
+
+Variables Barbora
+
+| ***Panel Survey***          |            |            |            |            |
+|--------------------------|-----------|-----------|-----------|-----------|
+| **Variable**                | **Wave 1** | **Wave 2** | **Wave 3** | **Wave 4** |
+| Most important issue        | Q01        | Q01        | Q01        | Q01        |
+| Intergroup comfort: Muslims | Q54        | Q48        |            |            |
+| Intergroup comfort: Poles   | Q56        | Q49        |            |            |
+| Ethnic minority             | Q68        |            |            |            |
+| Anti-immigrant attitudes    | Q42        | Q39        |            |            |
+| Immigrant follow up         | Q43        | Q40        |            |            |
+
+| *Content analysis*  |            |
+|---------------------|------------|
+| **Variable**        | **Label**  |
+| Outlet              | V4         |
+| Topic               | V6_cleaned |
+| Day                 | V3a        |
+| Month               | V3b        |
+| Year                | V3c        |
+| Emotion             | NL1 a-f    |
+| Mention Muslims     | NL2        |
+| Evaluation Muslims  | NL3        |
+| Mention Poles       | NL4        |
+| Evaluation Poles    | NL5        |
+
+
 Sará's RQs:
 
 ## 1. Rename variables
