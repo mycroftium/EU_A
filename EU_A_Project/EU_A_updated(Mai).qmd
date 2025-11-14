@@ -25,7 +25,9 @@ Mai's RQ:
 In the All_Waves document, variables needed:
 
 `Political cynicism`: Q10 (wave 1), Q07 (wave 2), Q11 (wave 3), Q13 (wave 4)\
-`EU-attitudes`: Q26, Q27 (wave 1), Q22, Q23 (wave 2), Q28, Q29 (wave 3), Q31, Q32 (wave4)Notes: In wave 1, 7 = pro EU for all nine items of Q26. In Q27, 7 = pro-EU for item 1, 2, 3, 4, 9 ;while 7 = against EU for item 5, 6, 7, 8.
+`EU-attitudes`: Q26, Q27 (wave 1), Q22, Q23 (wave 2), Q28, Q29 (wave 3), Q31, Q32 (wave4)
+
+Notes: In wave 1, 7 = pro EU for all nine items of Q26. In Q27, 7 = pro-EU for item 1, 2, 3, 4, 9 ;while 7 = against EU for item 5, 6, 7, 8.
 
 `self reported media exposure (TV)`: Q49 (wave 1), Q44 (wave 2) Q43 (wave 3) Q47 (wave 4)
 
@@ -50,7 +52,7 @@ Bará's RQs:
 Variables Barbora
 
 | ***Panel Survey***          |            |            |            |            |
-|--------------------------|-----------|-----------|-----------|-----------|
+|---------------------|-------------|-------------|-------------|-------------|
 | **Variable**                | **Wave 1** | **Wave 2** | **Wave 3** | **Wave 4** |
 | Most important issue        | Q01        | Q01        | Q01        | Q01        |
 | Intergroup comfort: Muslims | Q54        | Q48        |            |            |
@@ -59,20 +61,19 @@ Variables Barbora
 | Anti-immigrant attitudes    | Q42        | Q39        |            |            |
 | Immigrant follow up         | Q43        | Q40        |            |            |
 
-| *Content analysis*  |            |
-|---------------------|------------|
-| **Variable**        | **Label**  |
-| Outlet              | V4         |
-| Topic               | V6_cleaned |
-| Day                 | V3a        |
-| Month               | V3b        |
-| Year                | V3c        |
-| Emotion             | NL1 a-f    |
-| Mention Muslims     | NL2        |
-| Evaluation Muslims  | NL3        |
-| Mention Poles       | NL4        |
-| Evaluation Poles    | NL5        |
-
+| *Content analysis* |            |
+|--------------------|------------|
+| **Variable**       | **Label**  |
+| Outlet             | V4         |
+| Topic              | V6_cleaned |
+| Day                | V3a        |
+| Month              | V3b        |
+| Year               | V3c        |
+| Emotion            | NL1 a-f    |
+| Mention Muslims    | NL2        |
+| Evaluation Muslims | NL3        |
+| Mention Poles      | NL4        |
+| Evaluation Poles   | NL5        |
 
 Sará's RQs:
 
@@ -156,23 +157,25 @@ colnames(content_analysis) <- tolower(colnames(content_analysis))
 # (more consistent and easy to use)
 ```
 
-## 2. Split tibble (Principle 1)
+## 2. Select the variables that will be used in the analysis (Principle 1)
+
+Before splitting the tibble "EU_2014_renamed", we believe that `intnr` and `respnr` could both independently uniquely identify each input, thus both could act as the primary key. Out of convenience, we use `respnr` as the primary key.
 
 ```{r}
-# we first split the ALL_WAVES df into two tibbles: "demographic" & "all_waves"
+EU_2014_renamed |> 
+  count(intnr) |> 
+  filter(n >1)
 
-demographic <- EU_2014_renamed |> 
- select(
-      intnr, respnr, sample, waves,
-      starts_with("weight_"),  # Include all 4 weight columns
-      gender, age, education, region, family_size, pol2012)
+EU_2014_renamed |> 
+  count(respnr) |> 
+  filter(n>1)
+```
 
-all_waves <- EU_2014_renamed |> 
-  select(
-      intnr, respnr, sample, waves,
-      matches("^w[1-4]_") 
-  )
+We are extracting and creating a new tibble out of the tibble "EU_2014_renamed" (the table containing all survey data), namely "EU_needed".
 
+We also extract variables that will be further processed in our analysis out of the "content_analysis" tibble, namely "ca_needed"
+
+```{r}
 # We then split the content analysis df into two tibbles: the variables that we need and the one that will not be cleaned
 
 ca_needed <- content_analysis |> 
@@ -183,13 +186,13 @@ ca_needed <- content_analysis |>
         nl2_1_1:nl2_4_3, 
         nl3, 
         nl4_1_1:nl4_4_3, 
-        nl5
-        # Sara's variables
+        nl5,
+        v4 # Sara's variable
   )
 
-# Finally, we split the "all_waves" df into two tibbles, the one contains variabels that we need for further analysis and the other that contains variables that will not be used
+# Now, we split the "all_waves" df into two tibbles, the one contains variabels that we need for further analysis and the other that contains variables that will not be used
 
-waves <- all_waves |> 
+EU_needed <- all_waves |> 
   select(
         intnr, respnr, sample, waves,
         w1_date, w1_time, w2_date, w2_time, w3_date,
@@ -200,38 +203,39 @@ waves <- all_waves |>
         starts_with("w1_q43"), starts_with("w2_q48"),
         starts_with("w2_q49"), starts_with("w2_q39"),
         starts_with("w2_q40"), 
-        w1_q10_1:w1_q10_4, w2_q7_1:w2_q7_4, # Mai's variables
-        w3_q11_1:w3_q11_4, w4_q13_1:w4_q13_4,
-        w1_q26_1:w1_q26_9, w1_q27_1:w1_q27_9,
-        w2_q22_1:w2_q22_9, w2_q23_1:w2_q23_9,
-        w3_q28_1:w3_q28_9, w3_q29_1:w3_q29_9,
-        w4_q31_1:w4_q31_9, w4_q32_1:w4_q32_9,
-        w1_q49_1:w1_q26_10, w2_q44_1:w2_q44_10,
-        w3_q43_1:w3_q43_10, w4_q47_1:w4_q47_10,
-        w1_q50_1:w1_q50_10, w2_q45_1 : w2_q45_10,
-        w3_q44_1:w3_q44_10, w1_q51_1:w1_q51_3,
-        w2_q46_1:w2_q46_3, w3_q45_1:w3_q45_3,
-        w4_q49_1:w4_q49_3,
-        # Sara's variables
-        
+        starts_with("w1_q10"), starts_with("w2_q7"), # Mai's variables
+        starts_with("w3_q11"), starts_with("w4_q13"),
+        starts_with("w1_q26"), starts_with("w1_q27"),
+        starts_with("w2_q22"), starts_with("w2_q23"),
+        starts_with("w3_q28"), starts_with("w3_q29"),
+        starts_with("w4_q31"), starts_with("w4_q32"),
+        starts_with("w1_q49"), starts_with("w2_q44"),
+        starts_with("w3_q43"), starts_with("w4_q47"),
+        starts_with("w1_q50"), starts_with("w2_q45"),
+        starts_with("w3_q44"), starts_with("w1_q51"),
+        starts_with("w2_q46"), starts_with("w3_q45"),
+        starts_with("w4_q49"),
+        starts_with("w1_q5"), starts_with("w1_q32"), # Sara's variables
+        starts_with("w1_q34"), starts_with("w2_q35"),
+        starts_with("w3_q7"), starts_with("w1_q39"),
+        starts_with("w1_q42"), starts_with("w2_q39"),
+        starts_with("w1_q61"), starts_with("w1_q65"),
+        starts_with("w1_q67")
   )
 
 ```
 
-## 3. Pivot_longer all the items information (Principle 2)
+After splitting, we have two working tibbles:
 
-In the new tibble "waves", we see many variables that are measured with several items. This violates the data tidying principle 2, namely *each observation must have its own row*. To address this, we use function `pivot_longer()`. **(items)**
+1\) `EU_needed` this contains all the variables that will be included in further analysis
 
-```{r}
-# pivot_longer() tackling items. The code should create a new column: item_variablename
+3\) `ca_needed` this tibble contains all the variables that will be included in the further analysis that is related to the content analysis.
 
+## 3. Giving variables more informative names
 
-```
-
-Now further applying the second principle, we should also deal with the waves information within the column's name. (**waves**)
+Since the variable names in the document is in the format of "w1_q1_1" where the question number differs across different wave. We would like to standardise variable names.
 
 ```{r}
-# pivot_longer() tacklles waves information. This code should create a new column: wave capturing in which wave is this certain input collected
 
 ```
 
@@ -246,4 +250,39 @@ We should get rid of the textual explanation within each input (e.g., 1 helemaal
 
 ```
 
-## 4. In the content analysis we use separate_wider (Principle 3)
+## 5. Pivot_longer all the items information (Principle 2)
+
+In the new tibble "waves", we see many variables that are measured with several items. This violates the data tidying principle 2, namely *each observation must have its own row*. To address this, we use function `pivot_longer()`. **(items)**
+
+```{r}
+# pivot_longer() tackling items. The code should create a new column: item_variablename
+
+
+```
+
+Now further applying the second principle, we should also deal with the waves information within the column's name. (**waves**)
+
+```{r}
+# pivot_longer() tackles waves information. This code should create a new column: wave capturing in which wave is this certain input collected
+
+```
+
+## 6. Determine the primary keys and foreign keys of the table
+
+After applying the first the second principle of data tidying, now we come to decide upon the primary keys and foreign keys in each tibbles.
+
+First, `respnr` act as the primary key for tibble \`demographic\`
+
+```{r}
+demographic |> 
+  count(respnr) |> 
+  filter(n>1)
+```
+
+`respnr` and `waves` together act as the primary key for tibble "waves"
+
+```{r}
+
+```
+
+## 7. In the content analysis we use separate_wider (Principle 3)
