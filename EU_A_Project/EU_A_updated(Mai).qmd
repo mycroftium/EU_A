@@ -76,6 +76,26 @@ Variables Barbora
 
 Sará's RQs:
 
+Sará's RQs:
+
+| ***Panel survey*** |        |        |        |        |
+|--------------------|--------|--------|--------|--------|
+| **Variable**       | Wave 1 | Wave 2 | Wave 3 | Wave 4 |
+|                    |        |        |        |        |
+|                    |        |        |        |        |
+|                    |        |        |        |        |
+|                    |        |        |        |        |
+|                    |        |        |        |        |
+
+| *Content analysis* |           |
+|--------------------|-----------|
+| **Variable**       | **Label** |
+|                    |           |
+|                    |           |
+|                    |           |
+|                    |           |
+|                    |           |
+
 ## 1. Rename variables
 
 In the raw file, most of the variable names are structured in such a way that it has different question number in different waves.
