@@ -306,8 +306,27 @@ Principle 4 of the tidy tidying principle is: Each value must have its own cell.
 We should get rid of the textual explanation within each input (e.g., 1 helemaal mee oneens) by creating a new column capturing the label information.
 
 ```{r}
-# this code should create a new column to capture the label information
 
+# creating a vector capturing column names that have cells which include a number and its label
+# this vector will be used to select these columns from the dataset within separate_wider
+
+columns_for_separation <- EU_2014_cleaned |>
+  select_if(function(col) any(grep("1 hele|1 geen", col))) |> # selects only columns with cells
+  colnames()   # keeps only the names of the columns          # incl pattern in grep()
+
+```
+
+```{r}
+# separating scores and labels into two separate columns
+
+EU_2014_cleaned <- EU_2014_cleaned |>
+  separate_wider_delim(
+    cols = all_of(columns_for_separation), # takes columns the names of which are in the object
+    delim = stringr::regex(" (?=helemaal*)|(?=heel*)|(?=in redelijke mate)|(?=een beetje)|(?=zeer goed)|(?=geen)|(?=ongeveer)|(?=bijna alleen maar)"), # specifies the delim pattern
+    names_sep = "_",     # new columns given the old name "_" and a number
+    too_few = "align_start", 
+    cols_remove = TRUE
+) 
 ```
 
 ## 5. Pivot_longer all the items information (Principle 2)
