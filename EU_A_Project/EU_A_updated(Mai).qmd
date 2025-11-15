@@ -135,10 +135,6 @@ Now rename variables:
 # giving columns informative names, translating dutch names
 EU_2014_renamed <- EU_2014 |>
 rename(
-  intnr = INTNR,
-  respnr = RESPNR,
-  sample = SAMPLE,
-  waves = WAVES,
   weight_w1 = GEWICHTA1_w1,
   weight_w2 = GEWICHTA1_w2,
   weight_w3 = GEWICHTA1_w3,
@@ -289,7 +285,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     rename(
       w1_immigrant_followup = w1_q43) |>
     rename(
-      w2_immigrant_followup = w2_q40)
+      w2_immigrant_followup = w2_q40) |>
     rename(
       w1_highest_completed_education = w1_q61) |>
     rename(
