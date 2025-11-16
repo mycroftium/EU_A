@@ -93,9 +93,9 @@ Sará's RQs:
 | **Variable**                   | Wave 1 | Wave 2 | Wave 3 | Wave 4 |
 | National identity              | Q05    |        |        |        |
 | Attitudes globalisation        | Q32    |        |        |        |
-| Vote intention EU              | Q34    | Q35    | Q07    |        |
+| Vote intention EU              | Q34    |        |        |        |
 | Vote intention local elections | Q39    |        |        |        |
-| Anti-immigrant attitudes       | Q42    | Q39    |        |        |
+| Anti-immigrant attitudes       | Q42    |        |        |        |
 | Highest completed education    | Q61    |        |        |        |
 | Income                         | Q65    |        |        |        |
 | Employment status              | Q67    |        |        |        |
@@ -200,12 +200,12 @@ EU_2014_cleaned <- EU_2014_renamed |>
         intnr, respnr, sample, waves,
         w1_date, w1_time, w2_date, w2_time, w3_date,
         w3_time, w4_date, w4_time, 
-        matches("^w1_q1$"), matches("^w2_q1$"), matches("^w3_q1$"), matches("^w4_q1$"), # Barbora's variables
+        matches("^w1_q1$"), matches("^w2_q1$"), # Barbora's variables
+        matches("^w3_q1$"), matches("^w4_q1$"), 
         starts_with("w1_q54"), starts_with("w1_q56"),
         starts_with("w1_q68"), starts_with("w1_q42"),
         starts_with("w1_q43"), starts_with("w2_q48"),
-        starts_with("w2_q49"),
-        starts_with("w2_q40"), 
+        starts_with("w2_q49"), starts_with("w2_q40"), 
         starts_with("w1_q10"), matches("w2_q7$"), # Mai's variables
         starts_with("w3_q11"), starts_with("w4_q13"),
         starts_with("w1_q26"), starts_with("w1_q27"),
@@ -219,11 +219,9 @@ EU_2014_cleaned <- EU_2014_renamed |>
         starts_with("w2_q46"), starts_with("w3_q45"),
         starts_with("w4_q49"),
         matches("w1_q5$"), starts_with("w1_q32"), # Sara's variables
-        starts_with("w1_q34"), starts_with("w2_q35"),
-        matches("w3_q7$"), starts_with("w1_q39"),
-        starts_with("w1_q42"), starts_with("w2_q39"),
-        starts_with("w1_q61"), starts_with("w1_q65"),
-        starts_with("w1_q67")
+        starts_with("w1_q34"), starts_with("w1_q39"),
+        starts_with("w1_q42"), starts_with("w1_q61"), 
+        starts_with("w1_q65"), starts_with("w1_q67")
   )
 ```
 
