@@ -206,7 +206,7 @@ EU_2014_cleaned <- EU_2014_renamed |>
         starts_with("w1_q43"), starts_with("w2_q48"),
         starts_with("w2_q49"),
         starts_with("w2_q40"), 
-        starts_with("w1_q10"), starts_with("w2_q7"), # Mai's variables
+        starts_with("w1_q10"), matches("w2_q7$"), # Mai's variables
         starts_with("w3_q11"), starts_with("w4_q13"),
         starts_with("w1_q26"), starts_with("w1_q27"),
         starts_with("w2_q22"), starts_with("w2_q23"),
@@ -218,9 +218,9 @@ EU_2014_cleaned <- EU_2014_renamed |>
         starts_with("w3_q44"), starts_with("w1_q51"),
         starts_with("w2_q46"), starts_with("w3_q45"),
         starts_with("w4_q49"),
-        starts_with("w1_q5"), starts_with("w1_q32"), # Sara's variables
+        matches("w1_q5$"), starts_with("w1_q32"), # Sara's variables
         starts_with("w1_q34"), starts_with("w2_q35"),
-        starts_with("w3_q7"), starts_with("w1_q39"),
+        matches("w3_q7$"), starts_with("w1_q39"),
         starts_with("w1_q42"), starts_with("w2_q39"),
         starts_with("w1_q61"), starts_with("w1_q65"),
         starts_with("w1_q67")
