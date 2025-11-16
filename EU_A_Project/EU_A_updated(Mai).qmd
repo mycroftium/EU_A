@@ -204,7 +204,7 @@ EU_2014_cleaned <- EU_2014_renamed |>
         starts_with("w1_q54"), starts_with("w1_q56"),
         starts_with("w1_q68"), starts_with("w1_q42"),
         starts_with("w1_q43"), starts_with("w2_q48"),
-        starts_with("w2_q49"), starts_with("w2_q39"),
+        starts_with("w2_q49"),
         starts_with("w2_q40"), 
         starts_with("w1_q10"), starts_with("w2_q7"), # Mai's variables
         starts_with("w3_q11"), starts_with("w4_q13"),
