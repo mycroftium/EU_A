@@ -124,9 +124,9 @@ library(tidyverse)
 ```
 
 ```{r}
-# Import two data sets. Change the path name to the relative ones if needed
-EU_2014 <- read.csv('/Users/mycroftzhang/Downloads/Using R/EU2014/All waves GENERAL.csv')
-content_analysis <- read.csv('/Users/mycroftzhang/Downloads/Using R/EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
+# Import two data sets. The path is relative and should work as long as the 'EU2014' file is stored in the same location as R is running
+EU_2014 <- read.csv('EU2014/All waves GENERAL.csv')
+content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
 ```
 
 Now rename variables:
