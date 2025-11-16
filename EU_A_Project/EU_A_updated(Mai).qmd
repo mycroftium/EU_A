@@ -323,6 +323,26 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     too_few = "align_start", 
     cols_remove = TRUE
 ) 
+
+
+# We are parsing variables media_exposure_tv, media_exposure_newspaper, and media_exposure_internet.
+# since its current value also includes the unit (dagen per week)
+media_exposure = c(
+          "w1_media_exposure_tv", "w2_media_exposure_tv", 
+          "w3_media_exposure_tv", "w4_media_exposure_tv",
+          "w1_media_exposure_newspaper", "w2_media_exposure_newspaper", 
+          "w3_media_exposure_newspaper", "w4_media_exposure_newspaper", 
+          "w1_media_exposure_internet", "w2_media_exposure_internet",  
+          "w3_media_exposure_internet", "w4_media_exposure_internet"
+)
+          
+          
+EU_2014_cleaned <- EU_2014_cleaned |> 
+  mutate(across(starts_with(media_exposure), parse_number))
+
+
+# some problems with w1_national_identity? 
+# check w2_q23 as well
 ```
 
 ## 5. Pivot_longer all the items information (Principle 2)
