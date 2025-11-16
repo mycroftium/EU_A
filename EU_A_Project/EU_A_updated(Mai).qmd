@@ -218,7 +218,7 @@ EU_2014_cleaned <- EU_2014_renamed |>
         starts_with("w3_q44"), starts_with("w1_q51"),
         starts_with("w2_q46"), starts_with("w3_q45"),
         starts_with("w4_q49"),
-        matches("w1_q5$"), starts_with("w1_q32"), # Sara's variables
+        matches("w1_q5_"), starts_with("w1_q32"), # Sara's variables
         starts_with("w1_q34"), starts_with("w1_q39"),
         starts_with("w1_q42"), starts_with("w1_q61"), 
         starts_with("w1_q65"), starts_with("w1_q67")
@@ -238,7 +238,7 @@ Since the variable names in the document is in the format of "w1_q1_1" where the
 ```{r}
 # creating a vector capturing column names
 EU_2014_cleaned <- EU_2014_cleaned |> 
-    rename_with(function(x) gsub("w1_q5", "w1_national_identity", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q5_", "w1_national_identity_", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q32", "w1_attitude_global", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q34", "w1_vote_intention_eu", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q39", "w1_vote_intention_local", x, fixed = TRUE)) |>
