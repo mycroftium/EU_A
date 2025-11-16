@@ -252,7 +252,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     rename_with(function(x) gsub("w3_q28", "w3_eu_attitude", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w4_q31", "w4_eu_attitude", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q27", "w1_eu_attitude2", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w3_q29", "w3_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q23", "w2_eu_attitude2", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w3_q29", "w3_eu_attitude2", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w4_q32", "w4_eu_attitude2", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q49", "w1_media_exposure_tv", x, fixed = TRUE)) |>
