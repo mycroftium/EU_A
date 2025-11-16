@@ -310,6 +310,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
   separate_wider_delim(
     cols = all_of(columns_for_separation), # takes columns the names of which are in the object
     delim = stringr::regex(" (?=helemaal*)|(?=heel*)|(?=in redelijke mate)|(?=een beetje)|(?=zeer goed)|(?=geen)|(?=ongeveer)|(?=bijna alleen maar)"), # specifies the delim pattern
+    names = c("score","label"),
     names_sep = "_",     # new columns given the old name "_" and a number
     too_few = "align_start", 
     cols_remove = TRUE
