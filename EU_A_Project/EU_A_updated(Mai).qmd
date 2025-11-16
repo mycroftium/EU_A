@@ -275,21 +275,14 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     rename_with(function(x) gsub("w2_q48", "w2_comfort_muslims", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
-    rename(
-      w1_ethnic_minority = w1_q68) |>
-    rename(
-      w1_ethnic_minority_specification = w1_q68_yes) |>
-    rename_with(function(x) gsub("q39", "anti_immigrant_attitudes", x, fixed = TRUE)) |>
-    rename(
-      w1_immigrant_followup = w1_q43) |>
-    rename(
-      w2_immigrant_followup = w2_q40) |>
-    rename(
-      w1_highest_completed_education = w1_q61) |>
-    rename(
-      w1_income = w1_q65) |>    
-    rename(
-      w1_employment_status = w1_q67)
+    rename(w1_ethnic_minority = w1_q68) |>
+    rename(w1_ethnic_minority_specification = w1_q68_yes) |>
+    rename_with(function(x) gsub("w2_q39", "w2_anti_immigrant_attitudes", x, fixed = TRUE)) |>
+    rename(w1_immigrant_followup = w1_q43) |>
+    rename(w2_immigrant_followup = w2_q40) |>
+    rename(w1_highest_completed_education = w1_q61) |>
+    rename(w1_income = w1_q65) |>    
+    rename(w1_employment_status = w1_q67)
 
 ```
 
