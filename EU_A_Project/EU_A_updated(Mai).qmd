@@ -195,7 +195,7 @@ ca_needed <- content_analysis |>
 
 # Now, we split the "all_waves" df into two tibbles, one contains variables that we need for further analysis and the other that contains variables that will not be used
 
-EU_2014_cleaned <- all_waves |> 
+EU_2014_cleaned <- EU_2014_renamed |> 
   select(
         intnr, respnr, sample, waves,
         w1_date, w1_time, w2_date, w2_time, w3_date,
