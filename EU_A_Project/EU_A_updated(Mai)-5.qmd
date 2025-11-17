@@ -287,7 +287,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 ```
 ## Pivoting longer items 
 ```{r}
-EU_2014_cleaned |>
+EU_2014_cleaned <- EU_2014_cleaned |>
   pivot_longer(
     cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
     names_to = c(".value", "item"),
