@@ -184,14 +184,14 @@ We also extract variables that will be further processed in our analysis out of 
 
 ca_needed <- content_analysis |> 
   select(
-        v11, v12, v13, # Mai's variables
-        v4, v3a, v3b, v3c, v6_cleaned, #Barbora's variables
-        nl1a:nl1f, 
-        nl2_1_1:nl2_4_3, 
-        nl3, 
-        nl4_1_1:nl4_4_3, 
-        nl5,
-        v4 # Sara's variable
+    v3a:v3c,
+    v4,
+    v6_cleaned,
+    nl1a:nl1f,
+    nl2_1_1:nl2_4_3,
+    nl3,
+    nl4_1_1:nl4_4_3,
+    nl5
   )
 
 # Now, we split the "all_waves" df into two tibbles, one contains variables that we need for further analysis and the other that contains variables that will not be used
@@ -389,55 +389,16 @@ demographic |>
 
 # Content analysis
 
-## Libraries
 
-```{r}
-library(tidyverse)
-```
-
-## Reading in the data
-
-```{r}
-# read in the content analysis data 
-
-ca <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')                    
-```
-
-![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAaCAYAAADFTB7LAAAAcElEQVR4Xu3OwQmAQAxE0bClWYCW5N06tM6V2YPg5CjoF/JhLoHAi6iqn9eOefUbqrYvHY0cQDLyAlKRNyARmYA0ZMLRkAlGQyaU72tkAtlim7r/vJqDUDjlKBROOQyFU2icQuMUGqfQuBEaV1XPOwEx96nYACK8+wAAAABJRU5ErkJggg== "Run Current Chunk")
-
-## Cleaning
-
-```{r}
-# lowercasing column names
-
-colnames(ca) <- tolower(colnames(ca))
-```
-
-```{r}
-
-# selecting variables needed for analysis
-
-ca <- ca |> 
-  select(
-    v3a:v3c,
-    v4,
-    v6_cleaned,
-    nl1a:nl1f,
-    nl2_1_1:nl2_4_3,
-    nl3,
-    nl4_1_1:nl4_4_3,
-    nl5
-  )
-
-view(ca)
-```
 
 ### Cleaning dates and times
 
 ```{r}
 # replacing year numbers 
-ca |>
-  count(v3c)
+ca <- ca_needed 
+  
+ca |> 
+count(v3c)
 
 ca$v3c <- replace(ca$v3c, ca$v3c == 14, values = 2014)
 ca$v3c <- replace(ca$v3c, ca$v3c == 13, values = 2013)
