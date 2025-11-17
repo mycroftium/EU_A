@@ -198,7 +198,9 @@ ca_needed <- content_analysis |>
 
 EU_2014_cleaned <- EU_2014_renamed |> 
   select(
-        intnr, respnr, sample, waves,
+        intnr, respnr, sample, waves, 
+        weight_w1, weight_w2, weight_w3, weight_w4, 
+        gender, age, education, region, family_size, pol2012,
         w1_date, w1_time, w2_date, w2_time, w3_date,
         w3_time, w4_date, w4_time, 
         matches("^w1_q1$"), matches("^w2_q1$"), # Barbora's variables
