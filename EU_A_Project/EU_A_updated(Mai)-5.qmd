@@ -126,7 +126,7 @@ library(tidyverse)
 ```{r}
 # Import two data sets. The path is relative and should work as long as the 'EU2014' file is stored in the same location as R is running
 EU_2014 <- read.csv('EU2014/All waves GENERAL.csv')
-
+content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
 ```
 
 Now rename variables:
@@ -155,6 +155,7 @@ rename(
   w4_time = w4_TIJD,
 ) 
 colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed)) 
+colnames(content_analysis) <- tolower(colnames(content_analysis))
 
 # this function changes all column names to lowercase 
 # (more consistent and easy to use)
