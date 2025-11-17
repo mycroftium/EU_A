@@ -285,7 +285,15 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     rename(w1_employment_status = w1_q67)
 
 ```
-
+## Pivoting longer items 
+```{r}
+EU_2014_cleaned |>
+  pivot_longer(
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
+    names_to = c(".value", "item"),
+    names_pattern = "(.*)((?<=_)\\d)$"
+  ) 
+```
 ## 4. Separate numbers with labels (Principle 4)
 
 Principle 4 of the tidy tidying principle is: Each value must have its own cell.
@@ -344,6 +352,12 @@ In the new tibble "waves", we see many variables that are measured with several 
 ```{r}
 # pivot_longer() tackling items. The code should create a new column: item_variablename
 
+EU_2014_cleaned <- EU_2014_cleaned |>
+  pivot_longer(
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
+    names_to = c(".value", "item"),
+    names_pattern = "w(.*)_(.$)"
+  )
 
 ```
 
