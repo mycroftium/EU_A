@@ -285,6 +285,16 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     rename(w1_employment_status = w1_q67)
 
 ```
+## First pivot_longer(): Items
+
+```{r}
+EU_2014_cleaned <- EU_2014_cleaned |>
+  pivot_longer(
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
+    names_to = c(".value", "item"),
+    names_pattern = "(.*)((?<=_)\\d)$"
+  )
+```
 
 ## 4. Separate numbers with labels (Principle 4)
 
@@ -342,9 +352,16 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 In the new tibble "waves", we see many variables that are measured with several items. This violates the data tidying principle 2, namely *each observation must have its own row*. To address this, we use function `pivot_longer()`. **(items)**
 
 ```{r}
+{r}
 # pivot_longer() tackling items. The code should create a new column: item_variablename
 
-
+EU_2014_cleaned <- EU_2014_cleaned |>
+  pivot_longer(
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
+    names_to = c("wave", ".value"),
+    names_pattern = "w(.)_(.*)"
+  )
+#view(EU_2014_cleaned)
 ```
 
 Now further applying the second principle, we should also deal with the waves information within the column's name. (**waves**)
