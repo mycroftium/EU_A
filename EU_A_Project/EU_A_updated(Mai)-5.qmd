@@ -373,21 +373,159 @@ Now further applying the second principle, we should also deal with the waves in
 
 ## 6. Determine the primary keys and foreign keys of the table
 
-After applying the first the second principle of data tidying, now we come to decide upon the primary keys and foreign keys in each tibbles. We will separate the tibble "EU_2014_cleaned" into two tibbles: "demographic" and "waves"
+After pivot_longer(), we have the data in a long format, where many variables are repeated. This is violating the first principle of data tidying, namely each type of case must have its own tibble.
 
-First, `respnr` act as the primary key for tibble \`demographic\`
+Therefore, we need to split the full data set into separate tibbles based on different type of cases.
+
+We believe that the tibble "EU_2014_cleaned" could be split into nine tibbles based on various types of cases:
+
+1.  demographic
+2.  waves
+3.  comfort_muslims
+4.  comfort_poles
+5.  anti_immigrant
+6.  political_cynicism
+7.  eu_attitude1
+8.  eu_attitude2
+9.  attitude_global
+
+*Note*: the 3rd till 9th tibbles aims at preserving the relationship between value and their corresponding labels.
+
+Demographic includes variable:
+
+`intnr` \*, `respnr` , `sample`, `waves`, `weight_1`, `weight_2`, `weight_3`, `weight_4`, `gender`, `age`, `education`, `region`, `family_size`, `pol2012`
+
+where `intnr` will be the primary key.
+
+`intnr` is the foreign key in tibble `waves`
+
+We can first find the primary key by the following code:
+
+```{r}
+# we seperate the tibble by selecting corresponding variables
+demographic <- EU_2014_cleaned |> 
+  select(
+    intnr, respnr, sample, waves, weight_w1, weight_w2, weight_w3, 
+    weight_w4, gender, age, education, region, family_size, pol2012
+  ) |> 
+  distinct()
+
+# now we test the primary key 
+demographic |> 
+  count(intnr) |> 
+  filter(n>1)
+
+# we test whether tibble demographic has a foreign key intnr by joining
+demographic |> 
+  left_join(waves, by = "intnr")
+```
+
+Then we verify that those variables belong to the same type of case:
 
 ```{r}
 demographic |> 
-  count(respnr) |> 
-  filter(n>1)
+  group_by(intnr) |> 
+  summarise(n_distinct = n_distinct(respnr, sample, gender, age, education, region, family_size, pol2012, weight_w1, weight_w2, weight_w3, weight_w4 )) |> 
+  count(n_distinct)
+
 ```
 
-`respnr` and `waves` together act as the primary key for tibble ""
+The second tibble `waves` includes: intnr, item, wave, comfort_muslims_1, comfort_poles_1, anti_immigrant_1, political_cynicism_1, eu_attitude_1, eu_attitude2_1, media_exposure_tv), media_exposure_newspaper\_, media_exposure_internet\_, national_identity\_, attitude_global_1
 
 ```{r}
-
+waves <- EU_2014_cleaned |> 
+  select(
+    intnr, item, wave, comfort_muslims__1, 
+    comfort_poles__1, anti_immigrant__1, political_cynicism__1, 
+    eu_attitude__1, eu_attitude2__1, media_exposure_tv_, 
+    media_exposure_newspaper_, media_exposure_internet_, 
+    national_identity_, attitude_global__1
+  ) |> 
+  distinct()
 ```
+
+In this tibble, `intnr`, `item`, and `wave` together act as the primary key.
+
+`intnr` is the foreign key in tibble `demographic`
+
+```{r}
+# we test the primary key
+waves |> 
+  count(intnr, item, wave) |> 
+  filter(n>1)
+
+# we test the foreign key by joining
+waves |> 
+  left_join(demographic, by = "intnr")
+```
+
+Then we verify that those variables belong to the same type of case:
+
+```{r}
+waves |> 
+  group_by(intnr, item, wave) |> 
+  summarise(n_distinct = n_distinct(
+    comfort_muslims__1, comfort_poles__1, 
+    anti_immigrant__1, political_cynicism__1, 
+    eu_attitude__1, eu_attitude2__1, 
+    media_exposure_tv_, media_exposure_newspaper_, 
+    media_exposure_internet_, 
+    national_identity_, attitude_global__1), groups = "drop") |> 
+  count(n_distinct)
+```
+
+For the 3rd till the 9th tibbles:
+
+in each of those tibbles, the primary keys and the foreign keys are the actual value (e.g., `comfort_muslism__1`)
+
+```{r}
+# creating a new tibble by selecting both the value and label variables
+comfort_muslims <- EU_2014_cleaned |> 
+  select(comfort_muslims__1, comfort_muslims__2) |> 
+  distinct() |> 
+  drop_na()
+
+# we then test for the primary key 
+comfort_muslims |> 
+  count(comfort_muslims__1) |> 
+  filter(n>1)
+
+# we test whether comfort_muslism__1 is the foreign key by joining it to tibble waves
+waves |> 
+  left_join(comfort_muslims, by = "comfort_muslims__1")
+
+
+comfort_poles <- EU_2014_cleaned |> 
+  select(comfort_poles__1, comfort_poles__2) |> 
+  distinct() |> 
+  drop_na()
+
+anti_immigrant <- EU_2014_cleaned |> 
+  select(anti_immigrant__1, anti_immigrant__2) |> 
+  distinct() |> 
+  drop_na()
+
+political_cynicism <- EU_2014_cleaned |>
+  select(political_cynicism__1, political_cynicism__2) |> 
+  distinct() |> 
+  drop_na()
+
+eu_attitude1 <- EU_2014_cleaned |> 
+  select(eu_attitude__1, eu_attitude__2) |> 
+  distinct() |> 
+  drop_na()
+
+eu_attitude2 <- EU_2014_cleaned |> 
+  select(eu_attitude2__1, eu_attitude2__2) |> 
+  distinct() |> 
+  drop_na()
+
+attitude_global<- EU_2014_cleaned |> 
+  select(attitude_global__1, attitude_global__2) |> 
+  distinct() |> 
+  drop_na()
+```
+
 
 # Content analysis
 
