@@ -125,7 +125,7 @@ library(tidyverse)
 
 ```{r}
 # Import two data sets. The path is relative and should work as long as the 'EU2014' file is stored in the same location as R is running
-EU_2014 <- read.csv('EU2014/All waves GENERAL.csv')
+EU_2014 <- read.csv('EU2014/All waves GENERAL.csv') z
 content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
 ```
 
@@ -149,13 +149,13 @@ rename(
   w1_time = w1_TIJD,
   w2_date = w2_DATUM,
   w2_time = w2_TIJD,
-  w3_date = w3_DATUM,
+  w3_date = w3_DATUM, 
   w3_time = w3_TIJD,
   w4_date = w4_DATUM,
   w4_time = w4_TIJD,
 ) 
-colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed)) 
-colnames(content_analysis) <- tolower(colnames(content_analysis))
+colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed))             # tolower() takes column names and turns them into lower case
+colnames(content_analysis) <- tolower(colnames(content_analysis)) 
 
 # this function changes all column names to lowercase 
 # (more consistent and easy to use)
@@ -167,8 +167,8 @@ Before splitting the tibble "EU_2014_renamed", we believe that `intnr` and `resp
 
 ```{r}
 EU_2014_renamed |> 
-  count(intnr) |> 
-  filter(n >1)
+  count(intnr) |>                        # 
+  filter(n >1)                           # filters rows with repeated values for intnr
 
 EU_2014_renamed |> 
   count(respnr) |> 
@@ -241,11 +241,11 @@ Since the variable names in the document is in the format of "w1_q1_1" where the
 ```{r}
 # creating a vector capturing column names
 EU_2014_cleaned <- EU_2014_cleaned |> 
-    rename_with(function(x) gsub("w1_q5_", "w1_national_identity_", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w1_q32", "w1_attitude_global", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w1_q34", "w1_vote_intention_eu", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w1_q39", "w1_vote_intention_local", x, fixed = TRUE)) |>
-    rename_with(function(x) gsub("w1_q42", "w1_anti_immigrant", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q5_", "w1_national_identity_", x, fixed = TRUE)) |>         # gsub takes the pattern in the first argument and replaces it with that in the next 
+    rename_with(function(x) gsub("w1_q32", "w1_attitude_global", x, fixed = TRUE)) |>            # argument
+    rename_with(function(x) gsub("w1_q34", "w1_vote_intention_eu", x, fixed = TRUE)) |>          # function(x) tells rename_with() that how to deal with the object passed will be
+    rename_with(function(x) gsub("w1_q39", "w1_vote_intention_local", x, fixed = TRUE)) |>       # specified in a function that's coming
+    rename_with(function(x) gsub("w1_q42", "w1_anti_immigrant", x, fixed = TRUE)) |>             #
     rename_with(function(x) gsub("w1_q10", "w1_political_cynicism", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w2_q7", "w2_political_cynicism", x, fixed = TRUE)) |>
     rename_with(function(x) gsub("w3_q11", "w3_political_cynicism", x, fixed = TRUE)) |>
