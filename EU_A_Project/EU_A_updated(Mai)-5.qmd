@@ -351,12 +351,12 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 # check w2_q23 as well
 ```
 
-## 5. Pivot_longer all the items information (Principle 2)
+## 5. Pivot_longer all the waves information (Principle 2)
 
-In the new tibble "waves", we see many variables that are measured with several items. This violates the data tidying principle 2, namely *each observation must have its own row*. To address this, we use function `pivot_longer()`. **(items)**
+In the new tibble "waves", we see many variables that are measured with several waves. This violates the data tidying principle 2, namely *each observation must have its own row*. To address this, we use function `pivot_longer()`. **(waves)**
 
 ```{r}
-# pivot_longer() tackling items. The code should create a new column: item_variablename
+# pivot_longer() tackling waves. The code should create a new column: wave
 
 EU_2014_cleaned <- EU_2014_cleaned |>
   pivot_longer(
@@ -367,12 +367,6 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 #view(EU_2014_cleaned)
 ```
 
-Now further applying the second principle, we should also deal with the waves information within the column's name. (**waves**)
-
-```{r}
-# pivot_longer() tackles waves information. This code should create a new column: wave capturing in which wave is this certain input collected
-
-```
 
 ## 6. Determine the primary keys and foreign keys of the table
 
