@@ -454,6 +454,7 @@ colnames(content_analysis) <- tolower(colnames(content_analysis))
 ca <- content_analysis |> 
   select(
     v2, # primary key
+    np2,
     v3a:v3c,
     v4,
     v6_cleaned,
@@ -498,6 +499,7 @@ v3a:v3c,
 ca <- ca |>
   rename(
     identifier = v2,
+    random_page = np2,
     outlet = v4,
     topic = v6_cleaned,
     fear = nl1a,
@@ -573,13 +575,54 @@ content_analysis |>
 ```
 
 ```{r}
-# Now we identify the primary key for tibble ca:
+# Now we identify the primary key for tibble ca: BARBORA'S FAILED ATTEMPTS:
 
 ```{r}
 # Now we identify the primary key for tibble ca_needed:
 
+{r}
+# Now we identify the primary key for tibble ca:
+
 ca |>
   count(identifier, outlet, topic, fear, anger, disgust, hope) |>
   filter(n>1)
+
+ca |>
+  count(identifier, topic, fear, anger, disgust, hope) |>
+  filter(n>1) # worse
+
+ca |>
+  count(identifier, outlet, fear, anger, disgust, hope) |>
+  filter(n>1) #worse
+
+ca |>
+  count(identifier, date) |>
+  filter(n>1) # worse
+
+ca |>
+  count(identifier, date, outlet) |>
+  filter(n>1) # better
+
+ca |>
+  count(identifier, date, topic) |>
+  filter(n>1) # worse again
+
+ca |>
+  count(identifier, topic) |>
+  filter(n>1) # much worse
+
+ca |>
+  count(identifier, topic, random_page) |>
+  filter(n>1) # worse
+
+ca |>
+  count(identifier, date, topic, outlet) |>
+  filter(n>1) # best yet
+
+ca |>
+  count(identifier, date, topic, outlet, random_page) |>
+  filter(n>1) # best (8)
+
+#view(ca)
 ```
 
