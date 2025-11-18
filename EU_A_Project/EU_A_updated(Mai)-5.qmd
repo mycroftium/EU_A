@@ -497,6 +497,7 @@ v3a:v3c,
 
 ca <- ca |>
   rename(
+    identifier = v2,
     outlet = v4,
     topic = v6_cleaned,
     fear = nl1a,
