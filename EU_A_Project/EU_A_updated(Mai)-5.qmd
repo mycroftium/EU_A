@@ -125,7 +125,7 @@ library(tidyverse)
 
 ```{r}
 # Import two data sets. The path is relative and should work as long as the 'EU2014' file is stored in the same location as R is running
-EU_2014 <- read.csv('EU2014/All waves GENERAL.csv') z
+EU_2014 <- read.csv('EU2014/All waves GENERAL.csv') 
 content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
 ```
 
