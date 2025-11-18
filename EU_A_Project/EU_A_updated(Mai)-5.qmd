@@ -632,62 +632,10 @@ mutate(across(where(is.character), ~na_if(.x, ""))) |>
 ```
 
 ```{r}
-# moving evaluation columns to the front to exclude them from pivoting
-ca <- ca |>
-  relocate(starts_with("evaluation"), .before = mention_muslim_general_netherlands)
-  
-```
+# Now we identify the primary key for tibble ca_needed:
 
-```{r}
-# create a mention column that will indicate whether or not a group is mentioned
-# create a type column that will indicate which group is mentioned
-ca <- ca |>  
-  pivot_longer(
-    cols = mention_muslim_general_netherlands:last_col(),   # Selects the mention muslim columns
-    names_to = "type",
-    values_to = "mention"
-  )
-  
-ca <- ca |>  
-pivot_longer(
-  cols = starts_with("evaluation_"),
-  names_to = "evaluation_group",
-  values_to = "evaluation",
-  names_prefix = "evaluation_"
-)
-
-```
-
-```{r}
-# separating the type column to multiple variables
-ca <- ca |>  
-  separate_wider_delim(
-  type,
-  delim = "_",
-  names = c("trash","mention_group", "subgroup", "location"),
-  )
-  
-```
-
-```{r}
-# droppin the trash column
-ca <- ca |>  
- select(!trash)
-  
-
-ca
-```
-
-```{r}
-# changing categorical variables into factors
 ca |>
- mutate(across(outlet:mention, as.factor))
-
-
-
-
-
+  count(identifier) |>
+  filter(n>1)
 ```
 
-```         
-```
