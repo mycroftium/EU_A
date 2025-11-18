@@ -273,7 +273,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
     rename(w1_highest_completed_education = w1_q61) |>
     rename(w1_income = w1_q65) |>    
     rename(w1_employment_status = w1_q67)
-
+```
 
 ## 4. Separate numbers with labels (Principle 4)
 
