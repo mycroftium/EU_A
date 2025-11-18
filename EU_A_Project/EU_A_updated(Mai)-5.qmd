@@ -552,8 +552,6 @@ ca <- ca |>
     (outlet == "nu.nl")
   )
 
-ca |>
-  distinct(outlet)
 ```
 
 ### 
