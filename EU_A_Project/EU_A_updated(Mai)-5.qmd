@@ -126,7 +126,6 @@ library(tidyverse)
 ```{r}
 # Import two data sets. The path is relative and should work as long as the 'EU2014' file is stored in the same location as R is running
 EU_2014 <- read.csv('EU2014/All waves GENERAL.csv') 
-content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
 ```
 
 Now rename variables:
@@ -155,7 +154,6 @@ rename(
   w4_time = w4_TIJD,
 ) 
 colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed))             # tolower() takes column names and turns them into lower case
-colnames(content_analysis) <- tolower(colnames(content_analysis)) 
 
 # this function changes all column names to lowercase 
 # (more consistent and easy to use)
@@ -179,29 +177,6 @@ We are extracting and creating a new tibble out of the tibble "EU_2014_renamed" 
 
 We also extract variables that will be further processed in our analysis out of the "content_analysis" tibble, namely "ca_needed"
 
-```{r}
-# We then split the content analysis df into two tibbles: the variables that we need and the one that will not be cleaned
-
-ca_needed <- content_analysis |> 
-  select(
-    v2, # primary key
-    v3a:v3c,
-    v4,
-    v6_cleaned,
-    nl1a:nl1f,
-    nl2_1_1:nl2_4_3,
-    nl3,
-    nl4_1_1:nl4_4_3,
-    nl5
-  )
-```
-
-```{r}
-# Now we identify the primary key for tibble ca_needed:
-ca_needed |>
-  count(v2) >|
-  filter(n>1)
-```
 
 
 ```{r}
@@ -526,13 +501,35 @@ attitude_global<- EU_2014_cleaned |>
 
 # Content analysis
 
+```{r}
+content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
+```
 
+```{r}
+colnames(content_analysis) <- tolower(colnames(content_analysis)) 
+```
+
+```{r}
+# We then split the content analysis df into two tibbles: the variables that we need and the one that will not be cleaned
+
+ca <- content_analysis |> 
+  select(
+    v2, # primary key
+    v3a:v3c,
+    v4,
+    v6_cleaned,
+    nl1a:nl1f,
+    nl2_1_1:nl2_4_3,
+    nl3,
+    nl4_1_1:nl4_4_3,
+    nl5
+  )
+```
 
 ### Cleaning dates and times
 
 ```{r}
 # replacing year numbers 
-ca <- ca_needed 
   
 ca |> 
 count(v3c)
@@ -596,8 +593,6 @@ ca <- ca |>
     mention_east_noneu_home = nl4_4_3,
     evaluation_eastern_europeans = nl5
     ) 
-
-
 ```
 
 ### Filtering rows needed
@@ -630,12 +625,23 @@ mutate(across(where(is.character), ~na_if(.x, ""))) |>
   mutate(across(where(is.character), ~na_if(.x, " ")))
 
 ```
+we test for possible primary key combinations for content_analysis
+
+```{r}
+
+content_analysis |>
+  count(v2, v1, v3a, v4, np2, np5, v6_cleaned) |>
+  filter(n>1)
+```
+
+```{r}
+# Now we identify the primary key for tibble ca:
 
 ```{r}
 # Now we identify the primary key for tibble ca_needed:
 
 ca |>
-  count(identifier) |>
+  count(identifier, outlet, topic, fear, anger, disgust, hope) |>
   filter(n>1)
 ```
 
