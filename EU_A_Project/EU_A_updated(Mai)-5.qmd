@@ -184,6 +184,7 @@ We also extract variables that will be further processed in our analysis out of 
 
 ca_needed <- content_analysis |> 
   select(
+    v2, # primary key
     v3a:v3c,
     v4,
     v6_cleaned,
@@ -193,7 +194,17 @@ ca_needed <- content_analysis |>
     nl4_1_1:nl4_4_3,
     nl5
   )
+```
 
+```{r}
+# Now we identify the primary key for tibble ca_needed:
+ca_needed |>
+  count(v2) >|
+  filter(n>1)
+```
+
+
+```{r}
 # Now, we split the "all_waves" df into two tibbles, one contains variables that we need for further analysis and the other that contains variables that will not be used
 
 EU_2014_cleaned <- EU_2014_renamed |> 
@@ -230,9 +241,10 @@ EU_2014_cleaned <- EU_2014_renamed |>
 
 After splitting, we have two working tibbles:
 
-1\) `EU_2014_cleaned` this contains all the variables that will be included in further analysis
+1\) `EU_2014_cleaned` this contains all the variables that will be included in further analysis, where `intnr` is the primary key
 
-3\) `ca_needed` this tibble contains all the variables that will be included in the further analysis that is related to the content analysis.
+
+3\) `ca_needed` this tibble contains all the variables that will be included in the further analysis that is related to the content analysis. `v2` is the primary key in this tibble.
 
 ## 3. Giving variables more informative names
 
