@@ -289,7 +289,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 
 ### 2G Pivot_longer all the waves information (Principle 2)
 
-In the `EU_2014_cleaned`, many variables are measured with several waves. The information about which wave the variable is measured is included in the column name of each variable. This violates the data tidying Principle 2: each observation must have its own row. To address this, we use function `pivot_longer()`.
+In the `EU_2014_cleaned`, many variables are measured with several waves. The information about for which wave the variable is measured is included in the column name of each variable. This violates the data tidying Principle 2: each observation must have its own row. To address this, we use the function `pivot_longer()`.
 
 ```{r}
 # pivot_longer() to create a new column: wave
@@ -298,7 +298,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
   pivot_longer(
     cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
     names_to = c("wave", ".value"),
-    names_pattern = "w(.)_(.*)"
+    names_pattern = "w(.)_(.*)" # this expression tells names_pattern to ignore the initial "w", take the values that comes after it until an _ is reached (these go in the wave column) after which it takes everything that comes after (and uses it as names for new columns)
   )
 ```
 
@@ -306,7 +306,7 @@ EU_2014_cleaned <- EU_2014_cleaned |>
 
 After pivot_longer(), we have the data in a long format, where many variables are repeated. This is violating the Principle 1: each type of case must have its own tibble.
 
-Therefore, we need to split the full data set into separate tibbles based on different type of cases.We believe that the tibble "`EU_2014_cleaned`" could be split into two tibbles based on various types of cases:
+Therefore, we need to split the full data set into separate tibbles based on different type of cases. We believe that the tibble "`EU_2014_cleaned`" could be split into two tibbles based on various types of cases:
 
 1.  "demographic" (relating to data tied to respondents, `respnr` )
 2.  waves (relating to data tied to waves, `waves`)
