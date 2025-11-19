@@ -574,55 +574,22 @@ content_analysis |>
   filter(n>1)
 ```
 
-```{r}
-# Now we identify the primary key for tibble ca: BARBORA'S FAILED ATTEMPTS:
 
 ```{r}
-# Now we identify the primary key for tibble ca_needed:
+# The best primary key compound key solution that we could find for the ca tibble includes five variables and still does not uniquely identify each row.
 
-{r}
-# Now we identify the primary key for tibble ca:
-
-ca |>
-  count(identifier, outlet, topic, fear, anger, disgust, hope) |>
-  filter(n>1)
-
-ca |>
-  count(identifier, topic, fear, anger, disgust, hope) |>
-  filter(n>1) # worse
-
-ca |>
-  count(identifier, outlet, fear, anger, disgust, hope) |>
-  filter(n>1) #worse
-
-ca |>
-  count(identifier, date) |>
-  filter(n>1) # worse
-
-ca |>
-  count(identifier, date, outlet) |>
-  filter(n>1) # better
-
-ca |>
-  count(identifier, date, topic) |>
-  filter(n>1) # worse again
-
-ca |>
-  count(identifier, topic) |>
-  filter(n>1) # much worse
-
-ca |>
-  count(identifier, topic, random_page) |>
-  filter(n>1) # worse
-
-ca |>
-  count(identifier, date, topic, outlet) |>
-  filter(n>1) # best yet
-
-ca |>
   count(identifier, date, topic, outlet, random_page) |>
-  filter(n>1) # best (8)
+  filter(n>1) 
+```
+To achieve uniquely identifying each row, we would have to include all the variables. To avoid doing that, we decided to create a new, truly unique identifier.
 
-#view(ca)
+```{r}
+ca <- ca |>
+  mutate(
+    id = row_number()
+  ) |>
+  relocate(
+    id, .before = identifier
+  )
 ```
 
