@@ -59,7 +59,7 @@ RQ5: How does the intention to vote differ between EU and local elections, and w
 | Age |  |  |  |  |
 | Gender |  |  |  |  |
 
-*Notes: In wave 1, 7 = pro EU for all nine items of Q26. In Q27, 7 = pro-EU for item 1, 2, 3, 4, 9 ;while 7 = against EU for item 5, 6, 7, 8.*
+*Notes: In wave 1, 7 = pro EU for all nine items of Q26. In Q27, 7 = pro-EU for item 1, 2, 3, 4, 9 ;while items 5, 6, 7, 8 and reverse coded.*
 
 *In the Dataset MCA EPE 2014 NL FINAL document, variables needed:*
 
