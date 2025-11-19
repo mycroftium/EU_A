@@ -311,7 +311,7 @@ Therefore, we need to split the full data set into separate tibbles based on dif
 1.  "demographic" (relating to data tied to respondents, `respnr` )
 2.  waves (relating to data tied to waves, `waves`)
 
-The tibble `demographic` includes variable:
+The tibble `participants_info` includes variable:
 
 `intnr` \*, `respnr` , `sample`, `waves`, `weight_1`, `weight_2`, `weight_3`, `weight_4`, `gender`, `age`, `education`, `region`, `family_size`, `pol2012,`where `intnr` will be the primary key. `intnr` is the foreign key in tibble `waves`
 
@@ -320,23 +320,23 @@ The tibble `waves` includes:
 `intnr`, `wave`, `date`, `time`, `most_important_issue`, `comfort_muslims_score`, `comfort_muslims_label`, `comfort_poles_score`, `comfort_poles_label` (...) There will be a total of 116 variables in the `waves` tibble.
 
 ```{r}
-# Creating the "demographic" tibble by selecting corresponding variables
-demographic <- EU_2014_cleaned |> 
+# Creating the "participants_info" tibble by selecting corresponding variables
+participants_info <- EU_2014_cleaned |> 
   select(
     intnr, respnr, sample, waves, weight_w1, weight_w2, weight_w3, 
     weight_w4, gender, age, education, region, family_size, pol2012
   ) |> 
   distinct()
 
-# Testing for the primary key in tibble "demographic"
-demographic |> 
+# Testing for the primary key in tibble "participants_info"
+participants_info |> 
   count(intnr) |> 
   filter(n>1)
 
 # Creating the "waves" tibble by selecting corresponding variables
 waves <- EU_2014_cleaned |> 
   select(
-    intnr, wave, date, time, most_important_issue:political_cynicism_4_score
+    intnr, wave, date, time, most_important_issue:employment_status
   ) |> 
   distinct()
 
@@ -349,8 +349,8 @@ waves |>
 We have separated the `EU_2014_cleaned`into 2 tibbles. For both, we have tested for the primary key. In the following step we verify that those variables belong to the same type of case.
 
 ```{r}
-# Testing if all the variables in the "demographic" tibble belong to the same type of case.
-demographic |> 
+# Testing if all the variables in the "participants_info" tibble belong to the same type of case.
+participants_info |> 
   group_by(intnr) |> 
   summarise(n_distinct = n_distinct(respnr, sample, gender, age, education, region, family_size, pol2012, weight_w1, weight_w2, weight_w3, weight_w4 )) |> 
   count(n_distinct)
@@ -360,7 +360,7 @@ To test this in the wave tibble, we first need to first create a list of all the
 
 ```{r}
 col_names_wave <- waves |> 
-  select(date, time, most_important_issue:political_cynicism_4_score) |> 
+  select(date, time, most_important_issue:employment_status) |> 
   colnames()
 
 ```
@@ -374,15 +374,15 @@ waves |>
   count(n_distinct)
 ```
 
-In conclusion, the tibbles are separated accordingly and the data do belong to same type of case. We believe that in tibble `demographic`, `intnr` act as the foreign key in tibble `waves.`We believe that in tibble `waves` , `intnr` act as the foreign key in tibble `demographic.`
+In conclusion, the tibbles are separated accordingly and the data do belong to same type of case. We believe that in tibble `participants_info`, `intnr` act as the foreign key in tibble `waves.`We believe that in tibble `waves` , `intnr` act as the foreign key in tibble `participants_info`
 
 ```{r}
 # Testing for the foreign key by joining
 waves |> 
-  left_join(demographic, by = "intnr")
+  left_join(participants_info, by = "intnr")
 
 # Testing for the foreign key by joining the two tibbles
-demographic |> 
+participants_info |> 
   left_join(waves, by = "intnr")
 
 ```
