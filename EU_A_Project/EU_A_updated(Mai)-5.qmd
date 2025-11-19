@@ -386,7 +386,7 @@ demographic |>
 # We then create the "waves" tibble by selecting corresponding variables
 waves <- EU_2014_cleaned |> 
   select(
-    intnr, wave, date, time, most_important_issue:political_cynicism_4_score
+    intnr, wave, date, time, most_important_issue:employment_status
   ) |> 
   distinct()
 
@@ -411,7 +411,7 @@ demographic |>
 # we see that there are 35 columns selected, so as long as the n_distinct in the next step is 35
 # it means that all the variables in the tibble belong to the same type of case
 col_names_wave <- waves |> 
-  select(date, time, most_important_issue:political_cynicism_4_score) |> 
+  select(date, time, most_important_issue:employment_status) |> 
   colnames()
 
 
