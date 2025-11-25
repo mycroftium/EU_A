@@ -1,0 +1,740 @@
+---
+title: "Group project: Data Tidying: EU_A"
+subtitle: "Using R for data wrangling, analysis and visualization"
+author: "Barbora Kotuľáková, Mai Zhang, Sára Bystrovová"
+date: "November 19, 2025"
+format: 
+  html:
+    toc: true
+editor: visual
+---
+
+## 1. Group assignment
+
+### 1A Aim of the assignment
+
+The aim of this group assignment is to tidy both files so that they adhere to all four data tidying principles.
+
+1.  Each type of case must have its own tibble
+
+2.  Each observation must have its own row
+
+3.  Each variable must have its own column
+
+4.  Each value must have its own cell.
+
+### 1B Research questions and variables
+
+This cleaned data set will be used to subsequently answer following questions:
+
+*RQ1: To what extent is people's attitude toward the EU and their political cynicism developed throughout the EU election?*
+
+*RQ2: To what extent is people's attitude toward the EU and their political cynicism related to the media content they were exposed to?*
+
+*RQ3: How does the readership of Dutch media outlets differ in their attitudes regarding migration?*
+
+*RQ4: How do Dutch media outlets cover migration?*
+
+RQ5: How does the intention to vote differ between EU and local elections, and what is the relationship between the difference and national identity, attitude towards globalisation and anti-immigrant attitudes 6 months prior to the EU elections in regards to the media outlet voters are consuming content from?
+
+*In the All_Waves document, variables needed:*
+
+| ***Panel Survey*** |   |   |   |   |
+|----|----|----|----|----|
+| **Variable** | **Wave 1** | **Wave 2** | **Wave 3** | **Wave 4** |
+| Political cynicism | Q10 | Q7 | Q11 | Q13 |
+| EU attitudes | Q26, Q27 | Q22, Q23 | Q28, Q29 | Q31, Q32 |
+| Self reported media exposure (TV) | Q49 | Q44 | Q43 | Q47 |
+| Self reported media exposure (newspapers) | Q50 | Q45 | Q44 | Q48 |
+| Self reported media exposure (Internet) | Q51 | Q46 | Q45 | Q49 |
+| Most important issue | Q01 | Q01 | Q01 | Q01 |
+| Intergroup comfort: Muslims | Q54 | Q48 |  |  |
+| Intergroup comfort: Poles | Q56 | Q49 |  |  |
+| Ethnic minority | Q68 |  |  |  |
+| Anti-immigrant attitudes | Q42 | Q39 |  |  |
+| Immigrant follow up | Q43 | Q40 |  |  |
+| National identity | Q05 |  |  |  |
+| Attitudes globalisation | Q32 |  |  |  |
+| Vote intention EU | Q34 |  |  |  |
+| Vote intention local elections | Q39 |  |  |  |
+| Anti-immigrant attitudes | Q42 |  |  |  |
+| Highest completed education | Q61 |  |  |  |
+| Income | Q65 |  |  |  |
+| Employment status | Q67 |  |  |  |
+| Age |  |  |  |  |
+| Gender |  |  |  |  |
+
+*Notes: In wave 1, 7 = pro EU for all nine items of Q26. In Q27, 7 = pro-EU for item 1, 2, 3, 4, 9 ;while items 5, 6, 7, 8 and reverse coded.*
+
+*In the Dataset MCA EPE 2014 NL FINAL document, variables needed:*
+
+| *Content analysis* |   |
+|------------------------------------|------------------------------------|
+| **Variable** | **Label** |
+| How does the specific media evaluate the EU | V11 |
+| How does the specific media evaluate the European Parliament | V12 |
+| If the specific media mention a certain aspect related to the state of democracy in the EU and how do they evaluate it. | V13 |
+| Outlet | V4 |
+| Topic | V6_cleaned |
+| Day | V3a |
+| Month | V3b |
+| Year | V3c |
+| Emotion | NL1 a-f |
+| Mention Muslims | NL2 |
+| Evaluation Muslims | NL3 |
+| Mention Poles | NL4 |
+| Evaluation Poles | NL5 |
+| Identifier | V2 |
+
+## 2. Data tidying - *All_Waves*
+
+In this part, we are taking steps to ensure the data in document *`All_Waves`*
+
+### 2A Data loading
+
+```{r}
+#import relevant R library and datase
+library(tidyverse)
+```
+
+```{r}
+# import two data sets. The path is relative and should work as long as the 'EU2014' file is stored in the same location as R is running
+EU_2014 <- read.csv('EU2014/All waves GENERAL.csv') 
+```
+
+### 2B Rename variables
+
+In the raw file, most of the variable names are structured in such a way that it has different question number in different waves (*for instance: `Political cynicism`: Q10 (wave 1), Q07 (wave 2), Q11 (wave 3), Q13 (wave 4)).* For that reason we rename them into a consistent name e.g., `w1_polcyn_1`, `w2_polcyn_2`, etc. to adhere to data tidying principle 1: Each type of case must have its own tibble.
+
+```{r}
+# giving columns informative names and translating dutch names
+
+EU_2014_renamed <- EU_2014 |>
+rename(
+  weight_w1 = GEWICHTA1_w1,
+  weight_w2 = GEWICHTA1_w2,
+  weight_w3 = GEWICHTA1_w3,
+  weight_w4 = GEWICHTA1_w4,
+  gender = GSL,
+  age = LFT,
+  education = OPLA,
+  region = NIELSENCBS, 
+  family_size = GEZINSGROOTTE,
+  pol2012 = POL2012,
+  w1_date = w1_DATUM,
+  w1_time = w1_TIJD,
+  w2_date = w2_DATUM,
+  w2_time = w2_TIJD,
+  w3_date = w3_DATUM, 
+  w3_time = w3_TIJD,
+  w4_date = w4_DATUM,
+  w4_time = w4_TIJD,
+) 
+# tolower() takes column names and turns them into lower case. When lowercased, data is more consistent and easy to use.
+colnames(EU_2014_renamed) <- tolower(colnames(EU_2014_renamed))             
+
+
+```
+
+### 2C Select the variables that will be used in the analysis (Principle 1)
+
+Before splitting the tibble "`EU_2014_renamed`", we believe that `intnr` and `respnr` could both independently uniquely identify each input, thus both could act as the primary key. Out of convenience, we use `respnr` as the primary key.
+
+```{r}
+EU_2014_renamed |> 
+  count(intnr) |>                        
+  filter(n >1)                           # filters rows with repeated values for intnr
+
+EU_2014_renamed |> 
+  count(respnr) |> 
+  filter(n>1)
+```
+
+We are extracting and creating a new tibble out of the tibble `"EU_2014_renamed"` (the table containing all survey data) to the tibble that will be further cleaned `"EU_cleaned"`.
+
+```{r}
+# creating tibble with all variables we will proceed to clean.
+
+EU_2014_cleaned <- EU_2014_renamed |> 
+  select(
+        intnr, respnr, sample, waves, 
+        weight_w1, weight_w2, weight_w3, weight_w4, 
+        gender, age, education, region, family_size, pol2012,
+        w1_date, w1_time, w2_date, w2_time, w3_date,
+        w3_time, w4_date, w4_time, 
+        matches("^w1_q1$"), matches("^w2_q1$"), 
+        matches("^w3_q1$"), matches("^w4_q1$"), 
+        starts_with("w1_q54"), starts_with("w1_q56"),
+        starts_with("w1_q68"), starts_with("w1_q42"),
+        starts_with("w1_q43"), starts_with("w2_q48"),
+        starts_with("w2_q49"), starts_with("w2_q40"), 
+        starts_with("w1_q10"), matches("w2_q7$"), 
+        starts_with("w3_q11"), starts_with("w4_q13"),
+        starts_with("w1_q26"), starts_with("w1_q27"),
+        starts_with("w2_q22"), starts_with("w2_q23"),
+        starts_with("w3_q28"), starts_with("w3_q29"),
+        starts_with("w4_q31"), starts_with("w4_q32"),
+        starts_with("w1_q49"), starts_with("w2_q44"),
+        starts_with("w3_q43"), starts_with("w4_q47"),
+        starts_with("w1_q50"), starts_with("w2_q45"),
+        starts_with("w3_q44"), starts_with("w1_q51"),
+        starts_with("w2_q46"), starts_with("w3_q45"),
+        starts_with("w4_q49"), starts_with("w4_q48"),
+        matches("w1_q5_"), starts_with("w1_q32"), 
+        starts_with("w1_q34"), starts_with("w1_q39"),
+        starts_with("w1_q42"), starts_with("w1_q61"), 
+        starts_with("w1_q65"), starts_with("w1_q67")
+  )
+
+```
+
+### 2D Giving variables more informative names
+
+Since the variable names in the document is in the format of "w1_q1_1" where the question number differs across different wave, we will standardize variable names. The name will be in the format of wave_question_item.
+
+```{r}
+# creating a vector capturing column names with Gsub, which takes the pattern in the first argument and replaces it new name. X is a placeholder for EU_2014 cleaned
+
+EU_2014_cleaned <- EU_2014_cleaned |> 
+    rename_with(function(x) gsub("w1_q5_", "w1_national_identity_", x, fixed = TRUE)) |>      
+    rename_with(function(x) gsub("w1_q32", "w1_attitude_global", x, fixed = TRUE)) |>         
+    rename_with(function(x) gsub("w1_q34", "w1_vote_intention_eu", x, fixed = TRUE)) |>       
+    rename_with(function(x) gsub("w1_q39", "w1_vote_intention_local", x, fixed = TRUE)) |>    
+    rename_with(function(x) gsub("w1_q42", "w1_anti_immigrant", x, fixed = TRUE)) |>          
+    rename_with(function(x) gsub("w1_q10", "w1_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q7", "w2_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q11", "w3_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q13", "w4_political_cynicism", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q26", "w1_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q22", "w2_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q28", "w3_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q31", "w4_eu_attitude", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q27", "w1_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q23", "w2_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q29", "w3_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q32", "w4_eu_attitude2", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q49", "w1_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q44", "w2_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q43", "w3_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q47", "w4_media_exposure_tv", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q50", "w1_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q45", "w2_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q44", "w3_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q48", "w4_media_exposure_newspaper", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q51", "w1_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q46", "w2_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q45", "w3_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q49", "w4_media_exposure_internet", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q1", "w1_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q1", "w2_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w3_q1", "w3_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w4_q1", "w4_most_important_issue", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q54", "w1_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q48", "w2_comfort_muslims", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w1_q56", "w1_comfort_poles", x, fixed = TRUE)) |>
+    rename_with(function(x) gsub("w2_q49", "w2_comfort_poles", x, fixed = TRUE)) |>
+    rename(w1_ethnic_minority = w1_q68) |>
+    rename(w1_ethnic_minority_specification = w1_q68_yes) |>
+    rename_with(function(x) gsub("w2_q39", "w2_anti_immigrant_attitudes", x, fixed = TRUE)) |>
+    rename(w1_immigrant_followup = w1_q43) |>
+    rename(w2_immigrant_followup = w2_q40) |>
+    rename(w1_highest_completed_education = w1_q61) |>
+    rename(w1_income = w1_q65) |>    
+    rename(w1_employment_status = w1_q67)
+```
+
+### 2E Separate numbers with labels
+
+Principle 4 states: Each value must have its own cell. We should get rid of the textual explanation within each input (e.g., 1 helemaal mee oneens) by creating a new column capturing the label information. Before we do so, we start by creating a vector.
+
+```{r}
+# creating a vector capturing column names that have cells which include a number and its label
+# this vector will be used to select these columns from the dataset within separate_wider
+
+columns_for_separation <- EU_2014_cleaned |>
+  select_if(function(col) any(grep("1 hele|1 geen", col))) |> # selects only columns with cells
+  colnames()   # keeps only the names of the columns          # incl pattern in grep()
+
+```
+
+When we created vector capturing all label information, we separate_wider to create separate columns for scores and labels. The `all_of(columns_for_separation)`function takes the vector we have created in previous step to be used to split the columns. `delim = stringr::regex` specifies the delim pattern. names_sep ensures new columns are given the old name "\_" and a number.
+
+```{r}
+# separating scores and labels into two separate columns
+EU_2014_cleaned <- EU_2014_cleaned |>
+  separate_wider_delim(
+    cols = all_of(columns_for_separation),
+    delim = stringr::regex(" (?=helemaal*)|(?=heel*)|(?=in redelijke mate)|(?=een beetje)|(?=zeer goed)|(?=geen)|(?=ongeveer)|(?=bijna alleen maar)"),
+    names = c("score","label"),
+    names_sep = "_",     
+    too_few = "align_start", 
+    cols_remove = TRUE
+) 
+```
+
+### 2F Parsing
+
+We are parsing variables media_exposure_tv, media_exposure_newspaper, and media_exposure_internet, since its current value also includes the unit (dagen per week). This information needs to be removed before pivoting in the next step.
+
+```{r}
+# parsing "dagen per week"
+media_exposure = c(
+          "w1_media_exposure_tv", "w2_media_exposure_tv", 
+          "w3_media_exposure_tv", "w4_media_exposure_tv",
+          "w1_media_exposure_newspaper", "w2_media_exposure_newspaper", 
+          "w3_media_exposure_newspaper", "w4_media_exposure_newspaper", 
+          "w1_media_exposure_internet", "w2_media_exposure_internet",  
+          "w3_media_exposure_internet", "w4_media_exposure_internet"
+)
+          
+EU_2014_cleaned <- EU_2014_cleaned |> 
+  mutate(across(starts_with(media_exposure), parse_number))
+```
+
+### 2G Pivot_longer all the waves information (Principle 2)
+
+In the `EU_2014_cleaned`, many variables are measured with several waves. The information about for which wave the variable is measured is included in the column name of each variable. This violates the data tidying Principle 2: each observation must have its own row. To address this, we use the function `pivot_longer()`.
+
+```{r}
+# pivot_longer() to create a new column: wave
+
+EU_2014_cleaned <- EU_2014_cleaned |>
+  pivot_longer(
+    cols = c(starts_with("w1_"), starts_with("w2_"), starts_with("w3_"), starts_with("w4_")),
+    names_to = c("wave", ".value"),
+    names_pattern = "w(.)_(.*)" # this expression tells names_pattern to ignore the initial "w", take the values that comes after it until an _ is reached (these go in the wave column) after which it takes everything that comes after (and uses it as names for new columns)
+  )
+```
+
+### 2H Determine the primary keys and foreign keys of the table
+
+After pivot_longer(), we have the data in a long format, where many variables are repeated. This is violating the Principle 1: each type of case must have its own tibble.
+
+Therefore, we need to split the full data set into separate tibbles based on different type of cases. We believe that the tibble "`EU_2014_cleaned`" could be split into two tibbles based on various types of cases:
+
+1.  "demographic" (relating to data tied to respondents, `respnr` )
+2.  waves (relating to data tied to waves, `waves`)
+
+The tibble `participants_info` includes variable:
+
+`intnr` \*, `respnr` , `sample`, `waves`, `weight_1`, `weight_2`, `weight_3`, `weight_4`, `gender`, `age`, `education`, `region`, `family_size`, `pol2012,`where `intnr` will be the primary key. `intnr` is the foreign key in tibble `waves`
+
+The tibble `waves` includes:
+
+`intnr`, `wave`, `date`, `time`, `most_important_issue`, `comfort_muslims_score`, `comfort_muslims_label`, `comfort_poles_score`, `comfort_poles_label` (...) There will be a total of 116 variables in the `waves` tibble.
+
+```{r}
+# creating the "participants_info" tibble by selecting corresponding variables
+participants_info <- EU_2014_cleaned |> 
+  select(
+    intnr, respnr, sample, waves, weight_w1, weight_w2, weight_w3, 
+    weight_w4, gender, age, education, region, family_size, pol2012
+  ) |> 
+  distinct()
+
+# testing for the primary key in tibble "participants_info"
+participants_info |> 
+  count(intnr) |> 
+  filter(n>1)
+
+# creating the "waves" tibble by selecting corresponding variables
+waves <- EU_2014_cleaned |> 
+  select(
+    intnr, wave, date, time, most_important_issue:employment_status
+  ) |> 
+  distinct()
+
+# testing the primary key in tibble "waves"
+waves |> 
+  count(intnr, wave) |> 
+  filter(n>1)
+```
+
+We have separated the `EU_2014_cleaned`into 2 tibbles. For both, we have tested for the primary key. In the following step we verify that those variables belong to the same type of case.
+
+```{r}
+# testing if all the variables in the "participants_info" tibble belong to the same type of case.
+participants_info |> 
+  group_by(intnr) |> 
+  summarise(n_distinct = n_distinct(respnr, sample, gender, age, education, region, family_size, pol2012, weight_w1, weight_w2, weight_w3, weight_w4 )) |> 
+  count(n_distinct)
+```
+
+To test this in the wave tibble, we first need to first create a list of all the column names that appears in the "waves" tibble.
+
+```{r}
+col_names_wave <- waves |> 
+  select(date, time, most_important_issue:employment_status) |> 
+  colnames()
+
+```
+
+We see that there are 35 columns selected. If the `n_distinct` in the next step equals to 35, it means that all the variables in the tibble belong to the same type of case.
+
+```{r}
+waves |> 
+  group_by(intnr, wave) |> 
+  summarise(n_distinct = n_distinct(col_names_wave), .groups = "drop") |> 
+  count(n_distinct)
+```
+
+In conclusion, the tibbles are separated accordingly and the data do belong to same type of case. We believe that in tibble `participants_info`, `intnr` act as the foreign key in tibble `waves.`We believe that in tibble `waves` , `intnr` act as the foreign key in tibble `participants_info`
+
+```{r}
+# testing for the foreign key by joining
+waves |> 
+  left_join(participants_info, by = "intnr")
+
+# testing for the foreign key by joining the two tibbles
+participants_info |> 
+  left_join(waves, by = "intnr")
+
+```
+
+# 3. Data tidying: Dataset MCA EPE 2014 NL FINAL
+
+In this part, we are taking steps to ensure the data in document `Dataset MCA EPE 2014 NL FINAL` adhered to tidying principles. First, we start by loading the dataset, rename all variables to lower case as in scenario of previous dataset, followed by creating tibble from variables that will be cleaned and used for analysis in the future.
+
+```{r}
+# reading the data frame.
+content_analysis <- read.csv('EU2014/Dataset MCA EPE 2014 NL FINAL.csv')
+```
+
+```{r}
+# lowercasing all variables. 
+colnames(content_analysis) <- tolower(colnames(content_analysis)) 
+```
+
+```{r}
+# creating a tibble containing the variables that we need.
+
+ca <- content_analysis |> 
+  select(
+    v2, 
+    np2,
+    v3a:v3c,
+    v4,
+    v6_cleaned,
+    nl1a:nl1f,
+    nl2_1_1:nl2_4_3,
+    nl3,
+    nl4_1_1:nl4_4_3,
+    nl5
+  )
+```
+
+## 3A Cleaning dates and times
+
+The dataset includes information about when the article coded was published. The year variable only consisted of two digits, which looked odd when the columns were combined to produce the date variable with `lubridate()`. Furthermore, the variable date is split across many columns, hence we are creating one variable out of previous `v3c`, `v3b`, `v3a`.
+
+```{r}
+# replacing year numbers 
+  
+ca |> 
+count(v3c)
+
+ca$v3c <- replace(ca$v3c, ca$v3c == 14, values = 2014)
+ca$v3c <- replace(ca$v3c, ca$v3c == 13, values = 2013)
+```
+
+```{r}
+# creating date variable. 
+
+ca <- ca |> 
+  mutate(date = make_date(v3c, v3b, v3a),.keep = "unused", .before = v4)
+
+```
+
+## 3B Renaming variables
+
+In order for the variables to have informative names, we are renaming them.
+
+```{r}
+# renaming variables
+
+ca <- ca |>
+  rename(
+    identifier = v2,
+    random_page = np2,
+    outlet = v4,
+    topic = v6_cleaned,
+    fear = nl1a,
+    anger = nl1b,
+    disgust = nl1c,
+    hope = nl1d,
+    frustration = nl1e,
+    surprise = nl1f,
+    mention_muslim_general_netherlands = nl2_1_1,
+    mention_muslim_general_elsewhere = nl2_1_2,
+    mention_muslim_general_home = nl2_1_3,
+    mention_muslim_moroccans_netherlands = nl2_2_1,
+    mention_muslim_moroccans_elsewhere = nl2_2_2,
+    mention_muslim_moroccans_home = nl2_2_3,
+    mention_muslim_turkish_netherlands = nl2_3_1,
+    mention_muslim_turkish_elsewhere = nl2_3_2,
+    mention_muslim_turkish_home = nl2_3_3,
+    mention_muslim_other_netherlands = nl2_4_1,
+    mention_muslim_other_elsewhere = nl2_4_2,
+    mention_muslim_other_home = nl2_4_3,
+    evaluation_muslims = nl3,
+    mention_east_poles_netherlands = nl4_1_1,
+    mention_east_poles_elsewhere = nl4_1_2,
+    mention_east_poles_home = nl4_1_3,
+    mention_east_eu_netherlands = nl4_2_1,
+    mention_east_eu_elsewhere = nl4_2_2,
+    mention_east_eu_home = nl4_2_3,
+    mention_east_general_netherlands = nl4_3_1,
+    mention_east_general_elsewhere = nl4_3_2,
+    mention_east_general_home = nl4_3_3,
+    mention_east_noneu_netherlands = nl4_4_1,
+    mention_east_noneu_elsewhere = nl4_4_2,
+    mention_east_noneu_home = nl4_4_3,
+    evaluation_eastern_europeans = nl5
+    ) 
+```
+
+## 3C Filtering rows needed
+
+The dataset includes media outlets from Belgium as well, however their names are not provided, which makes linking them to specific outlets becomes impossible. Furthermore, the survey data concerns Dutch population only, hence only Dutch outlets were selected.
+
+```{r}
+# filtering rows needed for the analysis (Dutch media outlets)
+
+ca |> 
+  count(outlet)
+
+ca <- ca |>
+  filter(
+    (outlet == "NRC Handelsblad") |
+    (outlet == "de Volkskrant") |
+    (outlet == "de Telegraaf") |
+    (outlet == "NOS Journaal") |
+    (outlet == "RTL Nieuws") |
+    (outlet == "nu.nl")
+  )
+
+```
+
+## 3D Replacing blank cells with NA
+
+The following code tells R to find all cells which only contain a blank space or no value at all and to replace these with NAs. This will streamline the analysis as R will recognize these values as NAs.
+
+```{r}
+# replacing blank cells with NA
+
+ca <- ca |>
+mutate(across(where(is.character), ~na_if(.x, ""))) |> 
+  mutate(across(where(is.character), ~na_if(.x, " ")))
+
+```
+
+## 3E Testing for primary key
+
+We test for possible primary key combinations for `content_analysis`
+
+```{r}
+
+content_analysis |>
+  count(v2, v1, v3a, v4, np2, np5, v6_cleaned) |>
+  filter(n>1)
+```
+
+```{r}
+# testing for primary key
+ca |>
+count(identifier, date, topic, outlet, random_page) |>
+  filter(n>1) 
+```
+
+The best primary key compound key solution that we found for the ca tibble includes five variables and still does not uniquely identify each row. To achieve uniquely identifying each row, we would have to include all the variables. To avoid doing that, we decided to create a new, truly unique identifier.
+
+```{r}
+ca <- ca |>
+  mutate(
+    id = row_number()
+  ) |>
+  relocate(
+    id, .before = identifier
+  )
+```
+
+# 4 Description of Tidy Data
+
+## 4A Scope of the data
+
+The purpose of this code file is to tidy two data sets: survey results “All_waves” and content analysis data “Dataset MCA EPE 2014 NL FINAL“. The code results in 3 tibbles in line with 4 tidying principles - firstly  variables relating to participants in survey data set (“participants_info”), secondly variables relating to wave information in survey data set (“waves”) and lastly the content analysis tibble (“ca”). The tibble “participants_info” contains information about respondents, such as their unique number, age, gender, income, and weights the researchers assigned to observations. The tibble “waves” concerns variables captured during four waves, such as political cynicism, intention to vote in local elections, intention to vote in EU elections and further. The survey data have been collected between December 2013 June 2014 in the Netherlands. The data collection for content analysis ranged from December 2013 and finished in April 2014.
+
+## 4B Data quality
+
+**Principle 1** - The collected data are in two separate datasets (`All_waves` & `Dataset MCA EPE 2014 NL FINAL`), which are independent of each other. As a whole, the datasets do not share variables, hence joining the data can only be done arbitrarily. In the tibble of content analysis, the primary key consists of all variables in the data set, hence we concluded  is an artificial primary key. 
+
+**Principle 2** - The content analysis dataset contains identifier number (v2) for each article. As the identifier values repeat each other (against information in the codebook), the identifier cannot uniquely identify a column. 
+
+**Principle 4** - In the survey data set there is a mismatch between names of the variables in each wave. For this reason, when information about waves was pivoted, the variables did not correspond to each other. The variables have been renamed beforehand, however as not all variables are measured in all waves, comparison options in further analysis is limited. 
+
+## 4C 4 Principles
+
+To tidy the dataset, we have applied all 4 tidying principles. To ensure that each type of case must have its own tibble, we first found primary keys. Followingly, we have created tibble with variables we proceeded to clean. At the end of the tidying process, we have repeated this step to create 2 new tibbles again, separating participant information and waves information based on a new set of primary and foreign keys. To adhere to Principle 2 that each observation has its own row, we have pivoted longer the names of the variables. By doing so, observations from separate waves had its own row. To make sure each variable must have its own column, we have created a date column in the content analysis dataset from 3 separate columns. To adhere to Principle 4, each value must have its own cell, we have separated the data wider to separate answers that contained both score (on a Likert scale) and accompanying label (e.g. helemaal mee oneens). This way, the label and score have their separate columns. 
+
+# 5 Relations table
+
+![](images/diagram.jpg)
+
+The ER diagram above describes the relationship between tibble "participants_info" and "waves".
+
+In participants_info, `intnr` act as the primary key. `intnr` is the foreign key to tibble "waves".
+
+In waves, `intnr` and `wave` together act as the primary key. `intnr` is the foreign key to tibble "participants_info"
+
+The "participants_info" and "waves" tibble have a one-to-many relationship, since "waves" tibble is the result of pivot_longer().
+
+To combine these two table, simply join based on variable `intnr`
+
+To combine "waves" and the content analysis table ("ca"), one needs to join them based on the `outlet` column. In "waves" tibble, variables that starts with `media_exposure` were essentially asking participants how many days in a week do they watch the corresponding media platform
+
+(e.g., How many days a week do you watch the following TV programs?
+
+\[0 days a week … 7 days a week\]
+
+1\. RTL News 7:30 PM
+
+2\. NOS News 8:00 PM
+
+3\. Hart van Nederland
+
+4\. PowNews
+
+5\. De Wereld Draait Door (The World Keeps Turning)
+
+6\. Nieuwsuur (News Hour)
+
+7\. EenVandaag (One Today)
+
+8\. Pauw & Witteman
+
+9\. RTL Late Night (with Humberto Tan)
+
+10\. Other TV news)
+
+while in tibble "ca", the following media outlets were mentioned:
+
+"NRC Handelsblad", "de Volkskrant", "de Telegraaf", "NOS Journaal", "RTL Nieuws", "nu.nl". We can therefore connect these two tables based on this connection.
+
+# Individual project
+
+To do:
+
+What about cases when multiple media have max media exposure?
+
+Add the new column to waves as well.
+
+Computing a variable to capture the most consumed medium per partcipant
+
+```{r}
+#| eval: false
+#| include: false
+view(ca)
+view(EU_2014_cleaned)
+view(waves)
+view(participants_info)
+
+```
+
+Selecting only the variables capturing the media outlets for which we have information in the content analysis.
+
+These are:
+
+NRC Handelsblad ... media_exposure_newspaper_2
+
+de Volkskrant ... media_exposure_newspaper_6
+
+de Telegraaf ... media_exposure_newspaper_1
+
+NOS Journaal ... media_exposure_tv_2
+
+RTL Nieuws ... media_exposure_tv_1
+
+nu.nl ... media_exposure_internet_2
+
+```{r}
+media_exposure <- EU_2014_cleaned |>
+  select(intnr, wave,
+    media_exposure_tv_1, media_exposure_tv_2, 
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2
+  )
+```
+
+```{r}
+# calculating a new column showing the most consumed medium
+media_exposure <- media_exposure |>
+  mutate(most_consumed_medium = case_when( (
+    media_exposure_tv_1 == 0 &
+    media_exposure_tv_2 == 0 &
+    media_exposure_newspaper_1 == 0 &
+    media_exposure_newspaper_2 == 0 &
+    media_exposure_newspaper_6 == 0 &
+    media_exposure_internet_2 == 0) ~ "no favorite",
+    media_exposure_newspaper_2 == pmax(media_exposure_tv_1, media_exposure_tv_2, 
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2) ~ "NRC Handelsblad",
+    media_exposure_newspaper_6 == pmax(media_exposure_tv_1, media_exposure_tv_2, 
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2) ~ "de Volkskrant",
+    media_exposure_newspaper_1 == pmax(media_exposure_tv_1, media_exposure_tv_2, 
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2) ~ "de Telegraaf",
+    media_exposure_tv_2 == pmax(media_exposure_tv_1, media_exposure_tv_2, 
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2) ~ "NOS Journaal",
+    media_exposure_tv_1 == pmax(media_exposure_tv_1, media_exposure_tv_2,
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2) ~ "RTL Nieuws", 
+    media_exposure_internet_2 == pmax(media_exposure_tv_1, media_exposure_tv_2,
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2) ~ "nu.nl"
+    )) 
+```
+
+```{r}
+# selecting only the newly created column and intnr to make joining easier (avoid duplicates)
+media_exposure <- media_exposure |> select(
+  wave, intnr, most_consumed_medium
+)
+
+media_exposure
+```
+
+```{r}
+# joining the newly created column to EU_2014_cleaned
+EU_2014_cleaned <- EU_2014_cleaned |> 
+  left_join(media_exposure, by = c("intnr","wave"))
+EU_2014_cleaned
+```
+
+```{r}
+# joining the newly created column to waves
+waves <- waves |> 
+  left_join(media_exposure, by = c("intnr","wave"))
+waves
+```
+
+```{r}
+media_exposure |>
+  filter(
+    media_exposure_tv_1 == 0,
+    media_exposure_tv_2 == 0, 
+    media_exposure_newspaper_1 == 0,
+    media_exposure_newspaper_2 == 0,
+    media_exposure_newspaper_6 == 0,
+    media_exposure_internet_2 == 0
+  )
+```
+
+```{r}
+waves |>
+  select(media_exposure_tv_1, media_exposure_tv_2, 
+    media_exposure_newspaper_1, media_exposure_newspaper_2, media_exposure_newspaper_6,
+    media_exposure_internet_2, most_consumed_medium) |>
+  view()
+```
